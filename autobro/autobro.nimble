@@ -5,9 +5,10 @@ author        = "Luis Diaz"
 description   = "Utility tool to help with development commands and automation"
 license       = "MIT"
 srcDir        = "src"
-bin           = @["autobro"]
+bin           = @["bro"]
 
 
 # Dependencies
 
 requires "nim >= 2.2.6"
+requires "cligen >= 1.9.5"
