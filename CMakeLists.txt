@@ -8,15 +8,21 @@ target_sources(lstd
     FILE_SET HEADERS
     FILES
         lstd/vector.hpp
+        lstd/shared_ptr.hpp
 
     PRIVATE 
     lstd/vector.cpp
+    lstd/shared_ptr.hpp
 )
 
 
 # -- < Testing > ----------------------
 add_subdirectory(lib/Catch2)
-add_executable(tests tests/tests.cpp)
+add_executable(tests)
+target_sources(tests
+    PRIVATE 
+    tests/vector.cpp
+)
 target_link_libraries(tests
     PRIVATE
         Catch2::Catch2WithMain
