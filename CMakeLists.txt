@@ -1,7 +1,17 @@
 cmake_minimum_required(VERSION 3.23)
 
 project(lstd)
-add_subdirectory(lstd)
+add_library(lstd)
+
+target_sources(lstd
+    PUBLIC 
+    FILE_SET HEADERS
+    FILES
+        lstd/vector.hpp
+
+    PRIVATE 
+    lstd/vector.cpp
+)
 
 
 # -- < Testing > ----------------------
