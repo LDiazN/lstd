@@ -19,6 +19,9 @@ target_sources(lstd
 
 
 # -- < Testing > ----------------------
+option(BUILD_TESTS "If should build tests" OFF)
+
+if (BUILD_TESTS)
 add_subdirectory(lib/Catch2)
 add_executable(tests)
 target_sources(tests
@@ -33,3 +36,4 @@ target_link_libraries(tests
 include(CTest)
 include(Catch)
 catch_discover_tests(tests)
+endif()

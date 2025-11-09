@@ -28,7 +28,7 @@ proc build(g: bool = false): int =
 
 proc test(g: bool = false, c: bool = false): int = 
   return runcs(@[
-    if g: "cmake -B build" else: "",
+    if g: "cmake -DBUILD_TESTS=ON -B build" else: "",
     if g or c: "cmake --build build --target tests" else: "",
     "ctest --test-dir build"
   ])
