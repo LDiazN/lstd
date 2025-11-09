@@ -22,7 +22,7 @@ target_sources(lstd
 option(BUILD_TESTS "If should build tests" OFF)
 
 if (BUILD_TESTS)
-add_subdirectory(lib/Catch2)
+add_subdirectory(dependencies/Catch2)
 add_executable(tests)
 target_sources(tests
     PRIVATE 
