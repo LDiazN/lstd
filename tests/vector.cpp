@@ -1,5 +1,5 @@
 #include <catch2/catch_test_macros.hpp>
-#include <lstd/vector.hpp>
+#include <lstd/collections/vector.hpp>
 
 TEST_CASE("Vector control test", "[vector]") {
     auto v = lstd::Vector();

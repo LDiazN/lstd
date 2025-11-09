@@ -7,12 +7,12 @@ target_sources(lstd
     PUBLIC 
     FILE_SET HEADERS
     FILES
-        lstd/vector.hpp
-        lstd/shared_ptr.hpp
+        lstd/collections/vector.hpp
+        lstd/memory/rc_ptr.hpp
 
     PRIVATE 
-    lstd/vector.cpp
-    lstd/shared_ptr.hpp
+    lstd/collections/vector.cpp
+    lstd/memory/rc_ptr.cpp
 )
 
 
