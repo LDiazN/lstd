@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.23)
 project(lstd)
 add_library(lstd)
 
+# To add a new file, add its header in the public "FILES" section
+# and cpp files in the PRIVATE section
 target_sources(lstd
     PUBLIC 
     FILE_SET HEADERS
