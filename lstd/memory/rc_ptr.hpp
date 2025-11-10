@@ -10,7 +10,7 @@ namespace lstd {
         size_t count = 0;
         T *ptr = nullptr;
 
-        RcPtrEntry(T* _ptr) : ptr(_ptr) {}
+        RcPtrEntry(T* _ptr) : ptr(_ptr), count(1) {}
 
         /// Increases reference count, returns new count value
         int Inc() 
@@ -52,14 +52,12 @@ namespace lstd {
         RcPtr(T* ptr) 
         {
             entry = new RcPtrEntry<T>(ptr);
-            entry->Inc();
         }
 
         RcPtr(const T& value) 
         {
             auto ptr = new T(value);
             entry = new RcPtrEntry<T>(ptr);
-            entry->Inc();
         }
 
         RcPtr(const RcPtr<T>& other) 
@@ -68,7 +66,38 @@ namespace lstd {
                 return; 
             
             entry = other.entry;
-            other.entry->Inc();
+            entry->Inc();
+        }
+
+        RcPtr() {}
+
+        /// Current reference count. 
+        /// If null return 0
+        int Count() const {
+            if (entry != nullptr)
+                return entry->count;
+            return 0;
+        }
+
+        bool operator==(void* ptr) const {
+            if (entry == nullptr)
+                return ptr == nullptr;
+            
+            return ptr == entry->ptr;
+        }
+
+        bool operator!=(void* ptr) const {
+            return !(this->operator==(ptr));
+        }
+
+        bool operator==(const RcPtr<T>& other) const
+        {
+            return other.entry == entry;
+        }
+
+        bool operator!=(const RcPtr<T>& other) const
+        {
+            return !(this->operator==(other));
         }
 
     private:
