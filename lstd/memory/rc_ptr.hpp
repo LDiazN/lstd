@@ -71,6 +71,15 @@ namespace lstd {
 
         RcPtr() {}
 
+        ~RcPtr() 
+        {
+            if (entry == nullptr) // Destroying a nullptr
+                return;
+
+            Assert(entry->count > 0, "This pointer is already destroyed");
+            entry->Dec();
+        }
+
         /// Current reference count. 
         /// If null return 0
         int Count() const {
