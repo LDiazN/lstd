@@ -68,4 +68,15 @@ TEST_CASE("rc_ptr assign", "[rc_ptr]") {
     // Assign null to null does nothing
     lstd::Ptr<P> v3;
     v3 = nullptr;
+
+    // Assign to yourself should not increase ref count
+    lstd::Ptr<P> v4(new P{5,6});
+    v4 = v4;
+    REQUIRE(v4.Count() == 1);
+
+    // Transitive self-assign
+    lstd::Ptr<P> v5(new P{7,8});
+    lstd::Ptr<P> v6(v5);
+    v5 = v6;
+    REQUIRE(v5.Count() == 2);
 }
