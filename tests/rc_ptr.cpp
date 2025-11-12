@@ -6,6 +6,18 @@ struct P {
     int x,y;
 };
 
+// This class will count how many instances of itself there are alive
+// RcPtr should kill instances on scope exit
+struct Counter {
+    int *counter;
+    Counter(int* _counter) : counter(_counter) {
+        (*counter)++;
+    }
+    ~Counter() {
+        (*counter)--;
+    }
+};
+
 TEST_CASE("rc_ptr constructors", "[rc_ptr]") {
     auto v1 = lstd::Ptr<P>(new P{1,2}); // take ownership of this ptr
     auto v2 = lstd::Ptr<P>(P{3,4}); // from reference
@@ -79,4 +91,36 @@ TEST_CASE("rc_ptr assign", "[rc_ptr]") {
     lstd::Ptr<P> v6(v5);
     v5 = v6;
     REQUIRE(v5.Count() == 2);
+
+    // Check that the internal pointer is the original one
+    P* p = new P{9,0};
+    lstd::Ptr<P> v7(p);
+    
+    REQUIRE(v7.RawPtr() == p);
+    auto v8 = v7; // Also after assign
+    REQUIRE(v8.RawPtr() == p);
+
+    
+}
+
+TEST_CASE("rc_ptr consistent internal ptr", "[rc_ptr]") {
+    lstd::RcPtr<P> v1;
+    REQUIRE(v1.RawPtr() == nullptr);
+    lstd::RcPtr<P> v2(new P{1,2});
+    REQUIRE(v2.RawPtr() != nullptr);
+
+    // Assign null should reset the pointer to null
+    v2 = v1;
+    REQUIRE(v2.RawPtr() == nullptr);
+}
+
+TEST_CASE("rc_ptr ref count goes down", "[rc_ptr]") {
+
+    int instances = 0;
+    {
+        lstd::Ptr<Counter> v1(new Counter(&instances));
+        REQUIRE(instances == 1);
+    }
+
+    REQUIRE(instances == 0);
 }

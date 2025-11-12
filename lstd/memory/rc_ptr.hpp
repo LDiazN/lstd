@@ -89,6 +89,12 @@ namespace lstd {
             return 0;
         }
 
+        /// Get the internal raw pointer
+        /// Use at your own risk
+        T* RawPtr() const {
+            return entry == nullptr ? nullptr : entry->ptr;
+        }
+
         bool operator==(void* ptr) const {
             if (entry == nullptr)
                 return ptr == nullptr;
@@ -136,12 +142,29 @@ namespace lstd {
             return *this;
         }
 
+        RcPtr& operator=(RcPtr&& rvalue) {
+            // We're moving resources from rvalue to this instance
+            if (entry != nullptr)
+                entry->Dec();
+
+            entry = rvalue.Take()
+        }
+
         RcPtr& operator=(std::nullptr_t) {
             if (entry != nullptr)
                 entry->Dec();
 
             entry = nullptr;
             return *this;
+        }
+    private:
+        
+        /// Takes the value of the currently stored entry and resets 
+        /// this smart pointer to null, without altering reference count
+        RcPtrEntry<T>* Take() {
+            auto oldEntry = entry;
+            entry = nullptr;
+            return oldEntry;
         }
 
     private:
