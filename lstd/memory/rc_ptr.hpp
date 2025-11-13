@@ -1,18 +1,184 @@
 #ifndef SHARED_PTR_HPP
 #define SHARED_PTR_HPP
+#include <lstd/debug/assert.hpp>
 
 namespace lstd {
-    template <typename T>
-    class RcPtr
-    {
-    };
 
     template <typename T>
     struct RcPtrEntry
     {
         size_t count = 0;
         T *ptr = nullptr;
+
+        RcPtrEntry(T* _ptr) : ptr(_ptr), count(1) {}
+
+        /// Increases reference count, returns new count value
+        int Inc()
+        {
+            count++;
+            return count;
+        }
+
+        /// Decreases reference count, destroys internal object if counter reaches 0
+        /// Returns new count value
+        int Dec()
+        {
+            Assert(count > 0, "Reference count should be positive");
+
+            count--;
+            if (count == 0)
+            {
+                Destroy();
+                return 0;
+            }
+
+            return count;
+        }
+
+        /// Destroys internal object
+        void Destroy()
+        {
+            if (ptr != nullptr)
+                delete ptr;
+
+            ptr = nullptr;
+        }
     };
+
+    template <typename T>
+    class RcPtr
+    {
+    public:
+        RcPtr(T* ptr)
+        {
+            entry = new RcPtrEntry<T>(ptr);
+        }
+
+        RcPtr(const T& value)
+        {
+            auto ptr = new T(value);
+            entry = new RcPtrEntry<T>(ptr);
+        }
+
+        RcPtr(const RcPtr<T>& other)
+        {
+            if (other.entry == nullptr)
+                return;
+
+            entry = other.entry;
+            entry->Inc();
+        }
+
+        RcPtr(RcPtr<T>&& rvalue) noexcept
+        {
+            entry = rvalue.Take();
+        }
+
+        RcPtr() : entry(nullptr) {}
+
+        ~RcPtr()
+        {
+            if (entry == nullptr) // Destroying a nullptr
+                return;
+
+            Assert(entry->count > 0, "This pointer is already destroyed");
+            entry->Dec();
+        }
+
+        /// Current reference count.
+        /// If null return 0
+        int Count() const {
+            if (entry != nullptr)
+                return entry->count;
+            return 0;
+        }
+
+        /// Get the internal raw pointer
+        /// Use at your own risk
+        T* RawPtr() const {
+            return entry == nullptr ? nullptr : entry->ptr;
+        }
+
+        bool operator==(T* ptr) const {
+            if (entry == nullptr)
+                return ptr == nullptr;
+
+            return ptr == entry->ptr;
+        }
+
+        bool operator!=(T* ptr) const {
+            return !(this->operator==(ptr));
+        }
+
+        bool operator==(const RcPtr<T>& other) const
+        {
+            return other.entry == entry;
+        }
+
+        bool operator!=(const RcPtr<T>& other) const
+        {
+            return !(this->operator==(other));
+        }
+
+        T operator*() const {
+            Assert(entry != nullptr, "dereferencing null ptr");
+            return *entry->ptr;
+        }
+
+        T* operator->() const {
+            Assert(entry != nullptr, "dereferencing null ptr");
+            return entry->ptr;
+        }
+
+        RcPtr& operator=(const RcPtr& other)
+        {
+            if (*this == other)
+                return *this; // Nothing to do, already equal
+
+            if (other != nullptr)
+                other.entry->Inc();
+
+            if (entry != nullptr)
+                entry->Dec();
+
+            entry = other.entry;
+
+            return *this;
+        }
+
+        RcPtr& operator=(RcPtr&& rvalue) noexcept {
+            // We're moving resources from rvalue to this instance
+            if (entry != nullptr)
+                entry->Dec();
+
+            entry = rvalue.Take();
+            return *this;
+        }
+
+        RcPtr& operator=(std::nullptr_t) {
+            if (entry != nullptr)
+                entry->Dec();
+
+            entry = nullptr;
+            return *this;
+        }
+    private:
+
+        /// Takes the value of the currently stored entry and resets
+        /// this smart pointer to null, without altering reference count
+        RcPtrEntry<T>* Take() {
+            auto oldEntry = entry;
+            entry = nullptr;
+            return oldEntry;
+        }
+
+    private:
+        RcPtrEntry<T>* entry = nullptr;
+    };
+
+    // We consider RcPtr like the default pointer type
+    template <typename T>
+    using Ptr = RcPtr<T>;
 }
 
 #endif

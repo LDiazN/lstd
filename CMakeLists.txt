@@ -11,12 +11,17 @@ target_sources(lstd
     FILES
         lstd/collections/vector.hpp
         lstd/memory/rc_ptr.hpp
+        lstd/debug/assert.hpp
 
     PRIVATE 
     lstd/collections/vector.cpp
     lstd/memory/rc_ptr.cpp
+    lstd/debug/assert.cpp
 )
 
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    target_compile_definitions(lstd PRIVATE DEBUG)
+endif()
 
 # -- < Testing > ----------------------
 option(BUILD_TESTS "If should build tests" OFF)
@@ -27,6 +32,7 @@ add_executable(tests)
 target_sources(tests
     PRIVATE 
     tests/vector.cpp
+    tests/rc_ptr.cpp
 )
 target_link_libraries(tests
     PRIVATE

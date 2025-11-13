@@ -42,3 +42,6 @@
 
 # artifacts
 build
+
+# Vscode
+.vscode
