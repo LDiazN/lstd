@@ -1,7 +1,6 @@
 #ifndef SHARED_PTR_HPP
 #define SHARED_PTR_HPP
 #include <lstd/debug/assert.hpp>
-#include <iostream>
 
 namespace lstd {
 
@@ -70,6 +69,11 @@ namespace lstd {
             entry->Inc();
         }
 
+        RcPtr(RcPtr<T>&& rvalue) noexcept
+        {
+            entry = rvalue.Take();
+        }
+
         RcPtr() : entry(nullptr) {}
 
         ~RcPtr()
@@ -95,14 +99,14 @@ namespace lstd {
             return entry == nullptr ? nullptr : entry->ptr;
         }
 
-        bool operator==(void* ptr) const {
+        bool operator==(T* ptr) const {
             if (entry == nullptr)
                 return ptr == nullptr;
 
             return ptr == entry->ptr;
         }
 
-        bool operator!=(void* ptr) const {
+        bool operator!=(T* ptr) const {
             return !(this->operator==(ptr));
         }
 
@@ -142,12 +146,13 @@ namespace lstd {
             return *this;
         }
 
-        RcPtr& operator=(RcPtr&& rvalue) {
+        RcPtr& operator=(RcPtr&& rvalue) noexcept {
             // We're moving resources from rvalue to this instance
             if (entry != nullptr)
                 entry->Dec();
 
-            entry = rvalue.Take()
+            entry = rvalue.Take();
+            return *this;
         }
 
         RcPtr& operator=(std::nullptr_t) {
@@ -158,8 +163,8 @@ namespace lstd {
             return *this;
         }
     private:
-        
-        /// Takes the value of the currently stored entry and resets 
+
+        /// Takes the value of the currently stored entry and resets
         /// this smart pointer to null, without altering reference count
         RcPtrEntry<T>* Take() {
             auto oldEntry = entry;

@@ -9,13 +9,16 @@ struct P {
 // This class will count how many instances of itself there are alive
 // RcPtr should kill instances on scope exit
 struct Counter {
-    int *counter;
-    Counter(int* _counter) : counter(_counter) {
-        (*counter)++;
+    int *counter = nullptr;
+    Counter(int* _counter = nullptr) : counter(_counter) {
+        if (counter != nullptr)
+            (*counter)++;
     }
     ~Counter() {
-        (*counter)--;
+        if (counter != nullptr)
+            (*counter)--;
     }
+    int Count() const {return counter == nullptr ? 0 : *counter;}
 };
 
 TEST_CASE("rc_ptr constructors", "[rc_ptr]") {
@@ -23,11 +26,13 @@ TEST_CASE("rc_ptr constructors", "[rc_ptr]") {
     auto v2 = lstd::Ptr<P>(P{3,4}); // from reference
     auto v3 = lstd::Ptr<P>(v2); // create from another one
     auto v4 = lstd::Ptr<P>(); // Create null ptr
+    auto v5 = lstd::Ptr<P>(lstd::Ptr<P>(new P{5,6})); // Move constructor
 
     REQUIRE(v1.Count() == 1);
     REQUIRE(v2.Count() == 2);
     REQUIRE(v3.Count() == 2);
     REQUIRE(v4.Count() == 0);
+    REQUIRE(v5.Count() == 1);
 }
 
 TEST_CASE("rc_ptr equality", "[rc_ptr]") {
@@ -100,7 +105,16 @@ TEST_CASE("rc_ptr assign", "[rc_ptr]") {
     auto v8 = v7; // Also after assign
     REQUIRE(v8.RawPtr() == p);
 
-    
+    // Check move assign
+    lstd::Ptr<P> v9;
+    v9 = lstd::Ptr<P>(new P{1,1});
+    REQUIRE(v9.Count() == 1);
+    REQUIRE(v9->x == 1);
+    REQUIRE(v9->y == 1);
+
+    v9 = lstd::Ptr<P>(new P{2,2});
+    REQUIRE(v9->x == 2);
+    REQUIRE(v9->y == 2);
 }
 
 TEST_CASE("rc_ptr consistent internal ptr", "[rc_ptr]") {
@@ -124,3 +138,55 @@ TEST_CASE("rc_ptr ref count goes down", "[rc_ptr]") {
 
     REQUIRE(instances == 0);
 }
+
+TEST_CASE("rc_ptr inside structs or classes", "[rc_ptr]") {
+    int instances = 0;
+    struct S {
+        lstd::Ptr<Counter> ptr;
+    };
+
+    REQUIRE(instances == 0);
+    {
+        S s{lstd::RcPtr<Counter>(new Counter(&instances))};
+        REQUIRE(instances == 1);
+    }
+    REQUIRE(instances == 0);
+}
+
+TEST_CASE("rc_ptr inside array", "[rc_ptr]") {
+    int instances{0};
+    lstd::RcPtr<Counter>* counters{new lstd::RcPtr<Counter>[10]};
+
+    REQUIRE(instances == 0);
+
+    // All ptrs start null
+    for (size_t i = 0; i < 10; i++)
+        counters[i] = lstd::RcPtr<Counter>(new Counter(&instances)); // Move assign
+
+    REQUIRE(instances == 10);
+
+    delete[] counters;
+    REQUIRE(instances == 0);
+}
+
+TEST_CASE("rc_ptr simple linked list", "[rc_ptr]") 
+{
+    struct Node {
+        lstd::RcPtr<Node> next;
+        Counter value;
+    };
+
+    int instances{0};
+
+    {
+        lstd::RcPtr<Node> n1{new Node{nullptr, Counter(&instances)}};
+        lstd::RcPtr<Node> n2{new Node{n1, Counter(&instances)}};
+        lstd::RcPtr<Node> n3{new Node{n2, Counter(&instances)}};
+
+        REQUIRE(instances == 3);
+    }
+
+    REQUIRE(instances == 0);
+}
+
+// TODO compound test with our soon-to-come arrays
