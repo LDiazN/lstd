@@ -16,6 +16,6 @@ These are the rules I use to develop this library:
    
    3. We learn the ergonomics of the library by actually using it!
 
-3. **Keep it familiar, but don't get attached**: Keeping the same interface of the std char by char is not required, but I will try to keep it as similar as possible. The idea being to understand why some things in the STD are the way they are, and see if I achieve the same conclusions or if I have a different take 
+3. **Stay familiar, don’t obsess**: Keeping the same interface of the std char by char is not required, but I will try to keep it as similar as possible. The idea being to understand why some things in the STD are the way they are, and see if I achieve the same conclusions or if I have a different take 
 
 4. **Minimum build system**: In the spirit of rule 1, the build system should be as simple as possible, so that it's easy to develop and include in future projects
