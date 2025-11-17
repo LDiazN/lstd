@@ -12,18 +12,30 @@ namespace lstd
 
         Pair(T1 _first, T2 _second) : first(_first), second(_second) {}
         Pair() : first(), second() {}
-
-        bool operator<(const Pair<T1, T2> &other)
-        {
-            return first < other.first || (first == other.first && second < other.second);
-        }
-
-        bool operator==(const Pair<T1, T2> &other)
-        {
-            return first == other.first && second == other.second;
-        }
+        Pair(T1 value) : Pair(value, value) {}
     };
 
+    template <typename T1, typename T2>
+    bool operator<(const Pair<T1, T2>& left, const Pair<T1, T2>& right)
+    {
+        return left.first < right.first || (left.first == right.first && left.second < right.second);
+    }
+
+    template <typename T1, typename T2>
+    bool operator>(const Pair<T1, T2>& left, const Pair<T1, T2>& right)
+    {
+        return !(left < right) && left != right;
+    }
+
+    template <typename T1, typename T2>
+    bool operator==(const Pair<T1, T2>& left, const Pair<T1, T2>& right) {
+        return left.first == right.first && left.second == right.second;
+    }
+
+    template <typename T1, typename T2>
+    bool operator!=(const Pair<T1, T2>& left, const Pair<T1, T2>& right) {
+        return !(left == right);
+    }
 }
 
 #endif
