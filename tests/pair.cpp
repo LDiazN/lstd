@@ -1,5 +1,8 @@
 #include <catch2/catch_test_macros.hpp>
 #include <lstd/utils/pair.hpp>
+#include <map> // TODO replace with our own map
+#include <unordered_map> // TODO replace with our own map
+
 
 lstd::Pair<int,int> pii(int i, int j);
 lstd::Pair<int,int> pii(int i);
@@ -63,6 +66,41 @@ TEST_CASE("Pair order", "[pair]") {
     REQUIRE(!(pii(0, 0) > pii(1, 0))); // first smaller
     REQUIRE(!(pii(1, 0) > pii(1, 1))); // equal first, second smaller
     REQUIRE(!(pii(1, 1) > pii(1, 1))); // identical pairs
+}
+
+TEST_CASE("Pair works with map", "[pair]") {
+    // Supports ordering, therefore supports map
+    std::map<lstd::Pair<int,int>, int> m;
+    m[{1,2}] = 42;
+    m[{1,1}] = 24;
+    m[{0,0}] = 69;
+
+    REQUIRE(m[{0,0}] == 69);
+    REQUIRE(m[{1,1}] == 24);
+    REQUIRE(m[{1,2}] == 42);
+    REQUIRE(m.find({0,1}) == m.end()); // not there
+
+    // Keys should be ordered
+    lstd::Pair<int,int> keys[3];
+    int i = 0;
+    for(auto const& p : m) {
+        keys[i++] = p.first;
+    }
+
+    for(int i = 0; i < 2; i++)
+        REQUIRE(keys[i] < keys[i+1]);
+}
+
+TEST_CASE("Pair works with unordered map", "[pair]") {
+    // Supports equality, hashing. Therefore supports unordered_map
+    std::unordered_map<lstd::Pair<int,int>, int> m;
+
+    m[{1,2}] = 42;
+    m[{1,3}] = 69;
+
+    REQUIRE(m[{1,2}] == 42);
+    REQUIRE(m[{1,3}] == 69);
+    REQUIRE(m.find({0,0}) == m.end());
 }
 
 // Utility functions
