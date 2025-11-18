@@ -1,12 +1,19 @@
 #include <catch2/catch_test_macros.hpp>
 #include <lstd/utils/pair.hpp>
+#include <lstd/memory/rc_ptr.hpp>
 #include <map> // TODO replace with our own map
 #include <unordered_map> // TODO replace with our own map
-
 
 lstd::Pair<int,int> pii(int i, int j);
 lstd::Pair<int,int> pii(int i);
 lstd::Pair<int,int> pii();
+
+template <typename T1>
+using Rc = lstd::RcPtr<T1>;
+
+struct P {
+    int x,y;
+};
 
 TEST_CASE("Pair construction", "[pair]") {
     // Default construction uses default values
@@ -26,6 +33,14 @@ TEST_CASE("Pair construction", "[pair]") {
 
     // Can create it with braces syntax
     lstd::Pair<int,int> p4 = {3,4};
+
+    // Should be able to use move semantics for constructing objects
+    Rc<P> ptr(new P{1,2});
+    lstd::Pair<Rc<P>, int> p5(ptr, 7);
+    REQUIRE(ptr.Count() == 2);
+
+    lstd::Pair<Rc<P>, int> p6(Rc<P>(new P{3,4}), 99);
+    REQUIRE(p6.first.Count() == 1);
 }
 
 TEST_CASE("Pair equality", "[pair]") {

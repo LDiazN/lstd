@@ -10,9 +10,14 @@ namespace lstd
         T1 first;
         T2 second;
 
-        Pair(T1 _first, T2 _second) : first(_first), second(_second) {}
         Pair() : first(), second() {}
         Pair(T1 value) : Pair(value, value) {}
+
+        // All combinations of rvalue and lvalue
+        Pair(const T1& _first, const T2& _second) : first(_first), second(_second) {}
+        Pair(T1&& _first, T2&& _second) : first(std::move(_first)), second(std::move(_second)) {}
+        Pair(T1&& _first, const T2& _second) : first(std::move(_first)), second(_second) {}
+        Pair(const T1& _first, T2&& _second) : first(_first), second(std::move(_second)) {}
     };
 
     // Use standalone function operators to allow usage of rvalues in left hand
