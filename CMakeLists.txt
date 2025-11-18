@@ -6,14 +6,15 @@ add_library(lstd)
 # To add a new file, add its header in the public "FILES" section
 # and cpp files in the PRIVATE section
 target_sources(lstd
-    PUBLIC 
+    PUBLIC
     FILE_SET HEADERS
     FILES
         lstd/collections/vector.hpp
         lstd/memory/rc_ptr.hpp
+        lstd/memory/box_ptr.hpp
         lstd/debug/assert.hpp
 
-    PRIVATE 
+    PRIVATE
     lstd/collections/vector.cpp
     lstd/memory/rc_ptr.cpp
     lstd/debug/assert.cpp
@@ -30,9 +31,10 @@ if (BUILD_TESTS)
 add_subdirectory(dependencies/Catch2)
 add_executable(tests)
 target_sources(tests
-    PRIVATE 
+    PRIVATE
     tests/vector.cpp
     tests/rc_ptr.cpp
+    tests/box_ptr.cpp
 )
 target_link_libraries(tests
     PRIVATE
