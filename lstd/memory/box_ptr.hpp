@@ -5,6 +5,7 @@
 
 namespace lstd {
 
+    /// Simple owning ptr, only allows one reference to the given pointer
     template<typename T>
     class BoxPtr
     {
@@ -13,7 +14,7 @@ namespace lstd {
 
         BoxPtr(T* _ptr) : ptr(_ptr) {}
 
-        BoxPtr(BoxPtr other) = delete;
+        // BoxPtr(BoxPtr other) = delete;
 
         BoxPtr(const BoxPtr& other) = delete;
 
@@ -21,20 +22,24 @@ namespace lstd {
             ptr = other.Take();
         }
 
-        operator=(const BoxPtr& other) = delete;
+        BoxPtr<T>& operator=(const BoxPtr<T>& other) = delete;
 
-        operator=(BoxPtr&& other) {
+        BoxPtr<T>& operator=(BoxPtr<T>&& other) {
             // Q: Is this really possible?
             if (&other == this)
-                return;
+                return *this;
 
             Destroy();
             ptr = other.Take();
+
+            return *this;
         }
 
-        operator=(std::nullptr_t&) {
+        BoxPtr<T>& operator=(std::nullptr_t&) {
             Destroy();
             ptr = nullptr;
+
+            return *this;
         }
 
         ~BoxPtr() {
@@ -54,6 +59,10 @@ namespace lstd {
 
         bool operator==(const BoxPtr<T>& other) const {
             return ptr == other.ptr;
+        }
+
+        bool operator==(std::nullptr_t) const {
+            return ptr == nullptr;
         }
 
         bool operator!=(const BoxPtr<T>& other) const {

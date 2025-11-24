@@ -1,25 +1,9 @@
 
 #include <catch2/catch_test_macros.hpp>
 #include <lstd/memory/rc_ptr.hpp>
+#include "utils.hpp"
 
-struct P {
-    int x,y;
-};
-
-// This class will count how many instances of itself there are alive
-// RcPtr should kill instances on scope exit
-struct Counter {
-    int *counter = nullptr;
-    Counter(int* _counter = nullptr) : counter(_counter) {
-        if (counter != nullptr)
-            (*counter)++;
-    }
-    ~Counter() {
-        if (counter != nullptr)
-            (*counter)--;
-    }
-    int Count() const {return counter == nullptr ? 0 : *counter;}
-};
+using P = Point;
 
 TEST_CASE("rc_ptr constructors", "[rc_ptr]") {
     auto v1 = lstd::RcPtr<P>(new P{1,2}); // take ownership of this ptr
