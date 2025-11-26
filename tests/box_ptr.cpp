@@ -7,13 +7,33 @@ lstd::BoxPtr<P> bp(int x, int y);
 lstd::BoxPtr<Counter> bc(int *count);
 
 TEST_CASE("BoxPtr Construction", "[box_ptr]") {
-    lstd::BoxPtr<P> b2;
     lstd::BoxPtr<P> b1(new P{1,2});
+    lstd::BoxPtr<P> b2;
     lstd::BoxPtr<P> b3(bp(3,4));
 
     REQUIRE(b1.RawPtr() != nullptr);
     REQUIRE(b2.RawPtr() == nullptr);
     REQUIRE(b3.RawPtr() != nullptr);
+}
+
+TEST_CASE("BoxPtr Eq", "[box_ptr]") {
+    lstd::BoxPtr<P> b1;
+    lstd::BoxPtr<P> b2 = nullptr;
+    lstd::BoxPtr<P> b3(new P{1,2});
+    lstd::BoxPtr<P> b4(new P{1,2});
+
+    // Can compare to nullptr
+    REQUIRE(b1 == nullptr);
+    REQUIRE(b1 == b2);
+    REQUIRE(b3 != nullptr);
+    REQUIRE(b3 != b1);
+
+    // The values are equal but the pointers are not
+    REQUIRE(b4 != b3);
+
+    // You can clean the reference
+    b4 = nullptr;
+    REQUIRE(b4 == nullptr);
 }
 
 TEST_CASE("BoxPtr Assign", "[box_ptr]") {

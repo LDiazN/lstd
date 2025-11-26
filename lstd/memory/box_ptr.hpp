@@ -14,8 +14,6 @@ namespace lstd {
 
         BoxPtr(T* _ptr) : ptr(_ptr) {}
 
-        // BoxPtr(BoxPtr other) = delete;
-
         BoxPtr(const BoxPtr& other) = delete;
 
         BoxPtr(BoxPtr&& other) {
