@@ -13,6 +13,7 @@ target_sources(lstd
         lstd/memory/rc_ptr.hpp
         lstd/memory/box_ptr.hpp
         lstd/debug/assert.hpp
+        lstd/utils/pair.hpp
 
     PRIVATE
     lstd/collections/vector.cpp
@@ -37,6 +38,7 @@ target_sources(tests
     tests/vector.cpp
     tests/rc_ptr.cpp
     tests/box_ptr.cpp
+    tests/pair.cpp
 )
 target_link_libraries(tests
     PRIVATE

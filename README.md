@@ -9,7 +9,7 @@ These are the rules I use to develop this library:
 1. **Minimalist design**: We should use the least amount of reasonable code to implement the library. All code we write should be easily mapped to a feature.
 
 2. **Minimum reliance on std**: The point of this exercise is to understand and implement the std from first principles in a way that is easier to reason about. By avoiding the std we can understand:
-   
+
    1. What is most needed from the std.
    2. What is easy to replace and what is not.
    3. The ergonomics of the library by actually using it!
