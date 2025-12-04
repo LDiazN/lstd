@@ -1,5 +1,6 @@
 #include <catch2/catch_test_macros.hpp>
 #include <lstd/memory/box_ptr.hpp>
+#include <lstd/debug/assert.hpp>
 #include "utils.hpp"
 
 using P = Point;
@@ -54,6 +55,18 @@ TEST_CASE("BoxPtr Assign", "[box_ptr]") {
     REQUIRE(count == 1);
 }
 
+TEST_CASE("BoxPtr dereference", "[box_ptr]") {
+    lstd::BoxPtr<int> b1(new int(42));
+    lstd::BoxPtr<P> b2 = bp(1,2);
+    lstd::BoxPtr<P> b3;
+
+    REQUIRE(*b1 == 42);
+    REQUIRE(b2->x == 1);
+    REQUIRE(b2->y == 2);
+
+    // Dereferencing null throws exception on development mode
+    REQUIRE_THROWS_AS(*b3, lstd::AssertionError);
+}
 
 lstd::BoxPtr<P> bp(int x, int y) {
     return lstd::BoxPtr<P>(new P{x,y});
