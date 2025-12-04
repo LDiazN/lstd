@@ -41,6 +41,16 @@ TEST_CASE("Pair construction", "[pair]") {
 
     lstd::Pair<Rc<P>, int> p6(Rc<P>(new P{3,4}), 99);
     REQUIRE(p6.first.Count() == 1);
+
+    // Assign constructor
+    lstd::Pair<int, int> p7 = p2;
+    REQUIRE(p7.first == p2.first);
+    REQUIRE(p7.second == p2.second);
+
+    // Assign an already existent pair
+    p7 = p3;
+    REQUIRE(p7.first == p3.first);
+    REQUIRE(p7.second == p3.second);
 }
 
 TEST_CASE("Pair equality", "[pair]") {
