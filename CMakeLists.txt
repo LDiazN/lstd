@@ -28,6 +28,8 @@ endif()
 option(BUILD_TESTS "If should build tests" OFF)
 
 if (BUILD_TESTS)
+target_compile_definitions(lstd PRIVATE DEBUG)
+
 add_subdirectory(dependencies/Catch2)
 add_executable(tests)
 target_sources(tests

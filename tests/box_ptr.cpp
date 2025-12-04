@@ -53,6 +53,14 @@ TEST_CASE("BoxPtr Assign", "[box_ptr]") {
     // Assigning null should deallocate the counter
     b2 = nullptr;
     REQUIRE(count == 1);
+
+    // Assign to dereferenced value
+    auto b3 = bp(1,2);
+    *b3 = {3,4};
+    REQUIRE(b3->x == 3);
+    REQUIRE(b3->y == 4);
+
+    const P& p = *b3;
 }
 
 TEST_CASE("BoxPtr dereference", "[box_ptr]") {
