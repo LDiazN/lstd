@@ -10,7 +10,7 @@ namespace lstd {
     class BoxPtr
     {
     public:
-        BoxPtr() {}
+        BoxPtr() = default;
 
         BoxPtr(T* _ptr) : ptr(_ptr) {}
 
@@ -20,9 +20,9 @@ namespace lstd {
             ptr = other.Take();
         }
 
-        BoxPtr<T>& operator=(const BoxPtr<T>& other) = delete;
+        BoxPtr& operator=(const BoxPtr& other) = delete;
 
-        BoxPtr<T>& operator=(BoxPtr<T>&& other) {
+        BoxPtr& operator=(BoxPtr&& other) {
             // Q: Is this really possible?
             if (&other == this)
                 return *this;
@@ -33,7 +33,7 @@ namespace lstd {
             return *this;
         }
 
-        BoxPtr<T>& operator=(std::nullptr_t&) {
+        BoxPtr& operator=(std::nullptr_t) {
             Destroy();
             ptr = nullptr;
 
@@ -41,13 +41,11 @@ namespace lstd {
         }
 
         ~BoxPtr() {
-            if (ptr != nullptr)
-                delete ptr;
+            Destroy();
         }
 
         T& operator*() {
-            Assert(ptr != nullptr, "dereferencing null ptr");
-            return *ptr;
+            return const_cast<T&>(*std::as_const(*this));
         }
 
         const T& operator*() const {
@@ -56,8 +54,7 @@ namespace lstd {
         }
 
         T* operator->() {
-            Assert(ptr != nullptr, "dereferencing null ptr");
-            return ptr;
+            return const_cast<T*>(std::as_const(*this).operator->());
         }
 
         const T* operator->() const {
