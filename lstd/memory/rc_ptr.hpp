@@ -120,12 +120,22 @@ namespace lstd {
             return !(this->operator==(other));
         }
 
-        T operator*() const {
+        T& operator*() {
             Assert(entry != nullptr, "dereferencing null ptr");
             return *entry->ptr;
         }
 
-        T* operator->() const {
+        const T& operator*() const {
+            Assert(entry != nullptr, "dereferencing null ptr");
+            return *entry->ptr;
+        }
+
+        T* operator->() {
+            Assert(entry != nullptr, "dereferencing null ptr");
+            return entry->ptr;
+        }
+
+        const T* operator->() const {
             Assert(entry != nullptr, "dereferencing null ptr");
             return entry->ptr;
         }

@@ -56,7 +56,8 @@ TEST_CASE("BoxPtr Assign", "[box_ptr]") {
 
     // Assign to dereferenced value
     auto b3 = bp(1,2);
-    *b3 = {3,4};
+    *b3 = P{3,4};
+
     REQUIRE(b3->x == 3);
     REQUIRE(b3->y == 4);
 

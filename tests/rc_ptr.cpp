@@ -44,6 +44,15 @@ TEST_CASE("rc_ptr deref", "[rc_ptr]") {
     REQUIRE((*v1).x == 1);
     REQUIRE((*v1).y == 2);
     REQUIRE(v1->y == 2); // arrow syntax should also be available
+    *v = P{4,5};
+
+    REQUIRE(v->x == 4);
+    REQUIRE(v->y == 5);
+
+    const lstd::RcPtr<P> v2(new P{6,7});
+    auto v3 = *v2; // Can use dereference
+    REQUIRE(v3.x == v2->x);
+    REQUIRE(v3.y == v2->y);
 }
 
 TEST_CASE("rc_ptr assign", "[rc_ptr]") {

@@ -45,7 +45,7 @@ namespace lstd {
                 delete ptr;
         }
 
-        T& operator*() const {
+        T& operator*() {
             Assert(ptr != nullptr, "dereferencing null ptr");
             return *ptr;
         }
@@ -55,7 +55,12 @@ namespace lstd {
             return *ptr;
         }
 
-        T* operator->() const {
+        T* operator->() {
+            Assert(ptr != nullptr, "dereferencing null ptr");
+            return ptr;
+        }
+
+        const T* operator->() const {
             Assert(ptr != nullptr, "dereferencing null ptr");
             return ptr;
         }
