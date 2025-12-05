@@ -121,8 +121,7 @@ namespace lstd {
         }
 
         T& operator*() {
-            Assert(entry != nullptr, "dereferencing null ptr");
-            return *entry->ptr;
+            return const_cast<T&>(*std::as_const(*this));
         }
 
         const T& operator*() const {
@@ -131,8 +130,7 @@ namespace lstd {
         }
 
         T* operator->() {
-            Assert(entry != nullptr, "dereferencing null ptr");
-            return entry->ptr;
+            return const_cast<T*>(std::as_const(*this).operator->());
         }
 
         const T* operator->() const {
