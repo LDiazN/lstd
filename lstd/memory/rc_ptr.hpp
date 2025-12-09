@@ -170,6 +170,7 @@ namespace lstd {
             entry = nullptr;
             return *this;
         }
+
     private:
 
         /// Takes the value of the currently stored entry and resets

@@ -16,14 +16,13 @@ namespace lstd {
 
         BoxPtr(const BoxPtr& other) = delete;
 
-        BoxPtr(BoxPtr&& other) {
+        BoxPtr(BoxPtr&& other) noexcept {
             ptr = other.Take();
         }
 
         BoxPtr& operator=(const BoxPtr& other) = delete;
 
-        BoxPtr& operator=(BoxPtr&& other) {
-            // Q: Is this really possible?
+        BoxPtr& operator=(BoxPtr&& other) noexcept {
             if (&other == this)
                 return *this;
 
@@ -74,7 +73,11 @@ namespace lstd {
             return !(ptr == other.ptr);
         }
 
-        T* RawPtr() const {
+        T* RawPtr() {
+            return ptr;
+        }
+
+        const T* RawPtr() const {
             return ptr;
         }
 
@@ -85,7 +88,7 @@ namespace lstd {
             return p;
         }
 
-        void Destroy() {
+        void Destroy() noexcept {
             if (ptr != nullptr)
                 delete ptr;
         }
