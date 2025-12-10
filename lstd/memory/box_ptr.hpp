@@ -5,97 +5,77 @@
 
 namespace lstd {
 
-    /// Simple owning ptr, only allows one reference to the given pointer
-    template<typename T>
-    class BoxPtr
-    {
-    public:
-        BoxPtr() = default;
+/// Simple owning ptr, only allows one reference to the given pointer
+template <typename T> class BoxPtr {
+public:
+  BoxPtr() = default;
 
-        BoxPtr(T* _ptr) : ptr(_ptr) {}
+  BoxPtr(T *_ptr) : ptr(_ptr) {}
 
-        BoxPtr(const BoxPtr& other) = delete;
+  BoxPtr(const BoxPtr &other) = delete;
 
-        BoxPtr(BoxPtr&& other) noexcept {
-            ptr = other.Take();
-        }
+  BoxPtr(BoxPtr &&other) noexcept { ptr = other.Take(); }
 
-        BoxPtr& operator=(const BoxPtr& other) = delete;
+  BoxPtr &operator=(const BoxPtr &other) = delete;
 
-        BoxPtr& operator=(BoxPtr&& other) noexcept {
-            if (&other == this)
-                return *this;
+  BoxPtr &operator=(BoxPtr &&other) noexcept {
+    if (&other == this)
+      return *this;
 
-            Destroy();
-            ptr = other.Take();
+    Destroy();
+    ptr = other.Take();
 
-            return *this;
-        }
+    return *this;
+  }
 
-        BoxPtr& operator=(std::nullptr_t) {
-            Destroy();
-            ptr = nullptr;
+  BoxPtr &operator=(std::nullptr_t) {
+    Destroy();
+    ptr = nullptr;
 
-            return *this;
-        }
+    return *this;
+  }
 
-        ~BoxPtr() {
-            Destroy();
-        }
+  ~BoxPtr() { Destroy(); }
 
-        T& operator*() {
-            return const_cast<T&>(*std::as_const(*this));
-        }
+  T &operator*() { return const_cast<T &>(*std::as_const(*this)); }
 
-        const T& operator*() const {
-            Assert(ptr != nullptr, "dereferencing null ptr");
-            return *ptr;
-        }
+  const T &operator*() const {
+    Assert(ptr != nullptr, "dereferencing null ptr");
+    return *ptr;
+  }
 
-        T* operator->() {
-            return const_cast<T*>(std::as_const(*this).operator->());
-        }
+  T *operator->() { return const_cast<T *>(std::as_const(*this).operator->()); }
 
-        const T* operator->() const {
-            Assert(ptr != nullptr, "dereferencing null ptr");
-            return ptr;
-        }
+  const T *operator->() const {
+    Assert(ptr != nullptr, "dereferencing null ptr");
+    return ptr;
+  }
 
-        bool operator==(const BoxPtr<T>& other) const {
-            return ptr == other.ptr;
-        }
+  bool operator==(const BoxPtr<T> &other) const { return ptr == other.ptr; }
 
-        bool operator==(std::nullptr_t) const {
-            return ptr == nullptr;
-        }
+  bool operator==(std::nullptr_t) const { return ptr == nullptr; }
 
-        bool operator!=(const BoxPtr<T>& other) const {
-            return !(ptr == other.ptr);
-        }
+  bool operator!=(const BoxPtr<T> &other) const { return !(ptr == other.ptr); }
 
-        T* RawPtr() {
-            return ptr;
-        }
+  T *RawPtr() { return ptr; }
 
-        const T* RawPtr() const {
-            return ptr;
-        }
+  const T *RawPtr() const { return ptr; }
 
-    private:
-        T* Take() {
-            auto p = ptr;
-            ptr = nullptr;
-            return p;
-        }
+private:
+  T *Take() {
+    auto p = ptr;
+    ptr = nullptr;
+    return p;
+  }
 
-        void Destroy() noexcept {
-            if (ptr != nullptr)
-                delete ptr;
-        }
+  void Destroy() noexcept {
+    if (ptr != nullptr)
+      delete ptr;
+  }
 
-    private:
-        T* ptr = nullptr;
-    };
-}
+private:
+  T *ptr = nullptr;
+};
+} // namespace lstd
 
 #endif
