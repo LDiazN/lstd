@@ -95,14 +95,20 @@ public:
     return this->entry != other.entry;
   }
 
-  T &operator*() { return const_cast<T &>(*std::as_const(*this)); }
+  T &operator*() {
+    Assert(entry != nullptr, "dereferencing null ptr");
+    return *entry->ptr;
+  }
 
   const T &operator*() const {
     Assert(entry != nullptr, "dereferencing null ptr");
     return *entry->ptr;
   }
 
-  T *operator->() { return const_cast<T *>(std::as_const(*this).operator->()); }
+  T *operator->() {
+    Assert(entry != nullptr, "dereferencing null ptr");
+    return entry->ptr;
+  }
 
   const T *operator->() const {
     Assert(entry != nullptr, "dereferencing null ptr");

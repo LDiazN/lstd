@@ -37,14 +37,20 @@ public:
 
   ~BoxPtr() { Destroy(); }
 
-  T &operator*() { return const_cast<T &>(*std::as_const(*this)); }
+  T &operator*() {
+    Assert(ptr != nullptr, "dereferencing null ptr");
+    return *ptr;
+  }
 
   const T &operator*() const {
     Assert(ptr != nullptr, "dereferencing null ptr");
     return *ptr;
   }
 
-  T *operator->() { return const_cast<T *>(std::as_const(*this).operator->()); }
+  T *operator->() {
+    Assert(ptr != nullptr, "dereferencing null ptr");
+    return ptr;
+  }
 
   const T *operator->() const {
     Assert(ptr != nullptr, "dereferencing null ptr");
