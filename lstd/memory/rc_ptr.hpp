@@ -92,7 +92,7 @@ public:
   bool operator==(const RcPtr<T> &other) const { return other.entry == entry; }
 
   bool operator!=(const RcPtr<T> &other) const {
-    return !(this->operator==(other));
+    return this->entry != other.entry;
   }
 
   T &operator*() { return const_cast<T &>(*std::as_const(*this)); }

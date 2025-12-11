@@ -55,7 +55,7 @@ public:
 
   bool operator==(std::nullptr_t) const { return ptr == nullptr; }
 
-  bool operator!=(const BoxPtr<T> &other) const { return !(ptr == other.ptr); }
+  bool operator!=(const BoxPtr<T> &other) const { return ptr != other.ptr; }
 
   T *RawPtr() { return ptr; }
 
