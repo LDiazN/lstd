@@ -1,23 +1,25 @@
 import ./utils
+from strutils import endsWith, join
+import os
 
 proc sup(args: seq[string]): int =
   echo "sup bro"
   return 0
 
-proc update(): int = 
+proc update(): int =
   let r =  runcs(@[
     "cd autobro",
     "nimble build -d:release"
     ])
-  
+
   if r == 0:
     echo "Build successful"
     echo "Run: "
     echo "\tcp autobro/bro.exe ."
 
-proc build(g: bool = false): int = 
+proc build(g: bool = false): int =
   const generate_cmake = "cmake -B build"
-  const build_program = "cmake --build build" 
+  const build_program = "cmake --build build"
   if g:
     return runcs(@[
       generate_cmake,
@@ -26,14 +28,29 @@ proc build(g: bool = false): int =
   else:
     return runc(build_program)
 
-proc test(g: bool = false, c: bool = false): int = 
+proc test(g: bool = false, c: bool = false): int =
   return runcs(@[
     if g: "cmake -DBUILD_TESTS=ON -B build" else: "",
     if g or c: "cmake --build build --target tests" else: "",
     "ctest --test-dir build --output-on-failure"
   ])
 
-proc clean():int = 
+proc format(): int =
+  var files: seq[string] = @[]
+
+  const dirs = @["lstd", "tests"]
+  for dir in dirs:
+    for path in walkDirRec(dir):
+      if path.endsWith(".hpp") or path.endsWith(".cpp") or path.endsWith(".h"):
+        files.add(path)
+
+  if dirs.len == 0:
+    echo "No files to format"
+    return 0
+
+  return runc("clang-format -i " & files.join(" "))
+
+proc clean():int =
   return runcs(@[
     "echo 'About to delete builds directory...'",
     "rmdir /S build",
@@ -43,4 +60,5 @@ proc clean():int =
 
 
 when isMainModule:
-  import cligen; dispatchMulti([sup], [update], [build], [test], [clean])
+  import cligen
+  dispatchMulti([sup], [update], [build], [test], [clean], [format])

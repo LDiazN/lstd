@@ -11,6 +11,7 @@ target_sources(lstd
     FILES
         lstd/collections/vector.hpp
         lstd/memory/rc_ptr.hpp
+        lstd/memory/box_ptr.hpp
         lstd/debug/assert.hpp
         lstd/utils/pair.hpp
 
@@ -28,12 +29,15 @@ endif()
 option(BUILD_TESTS "If should build tests" OFF)
 
 if (BUILD_TESTS)
+target_compile_definitions(lstd PRIVATE DEBUG)
+
 add_subdirectory(dependencies/Catch2)
 add_executable(tests)
 target_sources(tests
     PRIVATE
     tests/vector.cpp
     tests/rc_ptr.cpp
+    tests/box_ptr.cpp
     tests/pair.cpp
 )
 target_link_libraries(tests

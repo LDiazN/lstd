@@ -2,10 +2,10 @@
 #define VECTOR_HPP
 
 namespace lstd {
-    class Vector {
-        public:
-            size_t Size() const;
-    };
-}
+class Vector {
+public:
+  size_t Size() const;
+};
+} // namespace lstd
 
 #endif
