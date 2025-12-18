@@ -11,7 +11,7 @@ public:
   virtual T* RawPtr() = 0;
   virtual const T* RawPtr() const = 0;
   virtual void Reset() = 0;
-  virtual void PushBack() = 0;
+  virtual void PushBack(const T& item) = 0;
   virtual void PopBack() = 0;
   virtual void Pop(size_t index) = 0;
 
@@ -30,6 +30,15 @@ class Vector : public BaseVector<T> {
     data = malloc(sizeof(T) * capacity);
   }
 
+  Vector(const Vector& other) : capacity(other.capacity), size(other.size)
+  {
+    data = malloc(sizeof(T) * capacity);
+
+    // Placement new with copy constructor
+    for (int i = 0; i < other.size; i++)
+      new (data+i) T(other[i]);
+  }
+
   ~Vector() override
   {
     for(size_t i = 0; i < size; i++)
@@ -38,13 +47,10 @@ class Vector : public BaseVector<T> {
     free(data);
   }
 
-  private:
-
-
-  private:
-  T* data;
-  size_t capacity;
-  size_t size;
+protected:
+  T* data = nullptr;
+  size_t capacity = 0;
+  size_t size = 0;
 };
 
 } // namespace lstd
