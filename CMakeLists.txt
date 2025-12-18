@@ -50,11 +50,10 @@ include(Catch)
 catch_discover_tests(tests)
 endif()
 
+# -- < Sandbox > --------------------------------
 option(SANDBOX "If should build sandbox exec" OFF)
 
-# -- < Sandbox > --------------------------------
 if (SANDBOX)
-
 add_executable(sandbox)
 
 target_sources(sandbox

@@ -1,15 +1,16 @@
 #include <iostream>
 #include <lstd/memory/rc_ptr.hpp>
 #include <lstd/utils/pair.hpp>
+#include <lstd/collections/vector.hpp>
+
 using namespace std;
 using namespace lstd;
 
 int main() {
 
-    Pair<string,string> p("Hello ", "World");
-    // Ptr<Pair<string,string>> p(new Pair("Hello ","World!"));
+    Ptr<Pair<string,string>> ptr(new Pair<string,string>("Hello ","World!"));
+    cout << ptr->first << ptr->second << endl;
 
-    cout << p.first << p.second << endl;
 
     return 0;
 }
