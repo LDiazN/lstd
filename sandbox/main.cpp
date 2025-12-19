@@ -6,11 +6,53 @@
 using namespace std;
 using namespace lstd;
 
+class A
+{
+public:
+    A()
+    {
+        cout << "[ ] Constructing (default)\n";
+    }
+    A(const A&)
+    {
+        cout << "[X] Constructing (copy)\n";
+    }
+
+    A& operator=(A&& other)
+    {
+        cout << "[ ] Moving\n";
+        return *this;
+    }
+
+    A& operator=(const A& other)
+    {
+        cout << "[X] Copying\n";
+        return *this;
+    }
+};
+
+class B
+{
+public:
+    void f(A a)
+    {
+        _a = std::move(a);
+    }
+    A _a;
+};
+
+void g(A a)
+{
+    // Control
+}
+
 int main() {
 
-    Ptr<Pair<string,string>> ptr(new Pair<string,string>("Hello ","World!"));
-    cout << ptr->first << ptr->second << endl;
-
+    A a;
+    cout << "--- < Ignore > ------------------------ \n";
+    B b;
+    cout << "--- < End Ignore > -------------------- \n";
+    b.f(a);
 
     return 0;
 }
