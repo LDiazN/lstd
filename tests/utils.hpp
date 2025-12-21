@@ -12,7 +12,20 @@ struct Counter {
   ~Counter() {
     if (counter != nullptr)
       (*counter)--;
+    counter = nullptr;
   }
+
+  Counter(const Counter& other) : counter(other.counter)
+  {
+    if (counter != nullptr)
+      (*counter)++;
+  }
+
+  Counter(Counter&& other) : counter(other.counter)
+  {
+    other.counter = nullptr;
+  }
+
   int Count() const { return counter == nullptr ? 0 : *counter; }
 };
 

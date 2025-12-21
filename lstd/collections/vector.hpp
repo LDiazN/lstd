@@ -31,16 +31,32 @@ class Vector : public BaseVector<T> {
   Vector(size_t initialCapacity = 8) : capacity(initialCapacity), size(0)
   {
     Assert(initialCapacity > 0, "Initial capacity should be always > 0 or resize breaks");
-    data = static_cast<T*>(malloc(sizeof(T) * capacity));
+    data = AllocateData(capacity);
+  }
+
+  Vector(size_t copies, const T& defaultValue) : capacity(8), size(copies)
+  {
+    // TODO there must be a bit trick to do this faster
+    while (capacity < copies)
+      capacity *= 2;
+
+    data = AllocateData(capacity);
+    for (size_t i = 0; i < size; i++)
+      new (data + i) T(defaultValue);
   }
 
   Vector(const Vector& other) : capacity(other.capacity), size(other.size)
   {
-    data = static_cast<T*>(malloc(sizeof(T) * capacity));
+    data = AllocateData(capacity);
 
     // Placement new with copy constructor
-    for (int i = 0; i < other.size; i++)
+    for (size_t i = 0; i < other.size; i++)
       new (data+i) T(other[i]);
+  }
+
+  Vector(Vector&& other) noexcept : data(other.data), capacity(other.capacity), size(other.size)
+  {
+    other.Clear();
   }
 
   ~Vector() override
@@ -48,6 +64,41 @@ class Vector : public BaseVector<T> {
     Vector::Reset();
     free(data);
     data = nullptr;
+  }
+
+  // Use copy-and-swap pattern
+  Vector& operator=(Vector other)
+  {
+    // Destroy current vector
+    Vector::Reset();
+    free(data);
+
+    // Copy from copy
+    capacity = other.capacity;
+    size = other.size;
+    data = other.data;
+
+    return *this;
+  }
+
+  Vector& operator=(Vector&& other) noexcept
+  {
+    if (this == &other)
+      return *this;
+
+    // Destroy current vector
+    Vector::Reset();
+    free(data);
+
+    // Copy from rvalue
+    size = other.size;
+    capacity = other.capacity;
+    data = other.data;
+
+    // Sets everything to zero
+    other.Clear();
+
+    return *this;
   }
 
   size_t Size() const override
@@ -74,6 +125,7 @@ class Vector : public BaseVector<T> {
   {
     for(size_t i = 0; i < size; i++)
       data[i].~T();
+    size = 0;
   }
 
   void PushBack(T item) override
@@ -112,12 +164,24 @@ private:
     return 2 * capacity;
   }
 
+  /// Nullifies the vector, setting everything to zero
+  void Clear() noexcept
+  {
+    data = nullptr;
+    capacity = size = 0;
+  }
+
   /// Changes the capacity of this vector
   void Resize()
   {
       size_t newCapacity = GetNewCapacity();
       data = static_cast<T*>(realloc(data, sizeof(T) * newCapacity));
       capacity = newCapacity;
+  }
+
+  static T* AllocateData(size_t count)
+  {
+    return static_cast<T*>(malloc(sizeof(T) * count));
   }
 
 protected:
