@@ -2,6 +2,7 @@
 #define VECTOR_HPP
 #include <cstdlib>
 #include <lstd/debug/assert.hpp>
+#include <sstream>
 
 namespace lstd {
 
@@ -17,37 +18,36 @@ public:
   virtual void Reset() = 0;
   virtual void PushBack(T item) = 0;
   virtual void PopBack() = 0;
-  // virtual void Pop(size_t index) = 0;
-
+  virtual void Pop(size_t index) = 0;
 
   virtual const T& operator[](size_t index) const = 0;
   virtual T& operator[](size_t index) = 0;
 };
 
+  size_t closest2Pow(size_t v);
+
 template<typename T>
 class Vector : public BaseVector<T> {
 
   public:
-  Vector(size_t initialCapacity = 8) : capacity(initialCapacity), size(0)
+  Vector(size_t initialCapacity = 8) : capacity(closest2Pow(initialCapacity)), size(0)
   {
     Assert(initialCapacity > 0, "Initial capacity should be always > 0 or resize breaks");
-    data = AllocateData(capacity);
+    data = Allocate(capacity);
   }
 
   Vector(size_t copies, const T& defaultValue) : capacity(8), size(copies)
   {
-    // TODO there must be a bit trick to do this faster
-    while (capacity < copies)
-      capacity *= 2;
+    capacity = closest2Pow(copies);
 
-    data = AllocateData(capacity);
+    data = Allocate(capacity);
     for (size_t i = 0; i < size; i++)
       new (data + i) T(defaultValue);
   }
 
   Vector(const Vector& other) : capacity(other.capacity), size(other.size)
   {
-    data = AllocateData(capacity);
+    data = Allocate(capacity);
 
     // Placement new with copy constructor
     for (size_t i = 0; i < other.size; i++)
@@ -66,36 +66,31 @@ class Vector : public BaseVector<T> {
     data = nullptr;
   }
 
-  // Use copy-and-swap pattern
-  Vector& operator=(Vector other)
+  Vector& operator=(const Vector& other)
   {
-    // Destroy current vector
-    Vector::Reset();
-    free(data);
+    if (&other == this)
+      return *this;
 
-    // Copy from copy
-    capacity = other.capacity;
-    size = other.size;
-    data = other.data;
+    // Defer to the move assign
+    *this = Vector(other);
 
     return *this;
   }
 
   Vector& operator=(Vector&& other) noexcept
   {
-    if (this == &other)
+    if (&other == this)
       return *this;
 
     // Destroy current vector
     Vector::Reset();
     free(data);
 
-    // Copy from rvalue
-    size = other.size;
+    // Swap from copy
     capacity = other.capacity;
+    size = other.size;
     data = other.data;
 
-    // Sets everything to zero
     other.Clear();
 
     return *this;
@@ -145,6 +140,17 @@ class Vector : public BaseVector<T> {
     size--;
   }
 
+  void Pop(size_t index) override
+  {
+    Assert(index < size, "Position to pop out of range");
+    size--;
+    data[index].~T(); // Destroy
+
+    // Move memory to fill the gap
+    for (size_t i = index; i < size; i++)
+      data[i] = std::move(data[i + 1]);
+  }
+
   const T& operator[](size_t index) const override
   {
     Assert(index < size, "Index out of range");
@@ -179,7 +185,7 @@ private:
       capacity = newCapacity;
   }
 
-  static T* AllocateData(size_t count)
+  static T* Allocate(size_t count)
   {
     return static_cast<T*>(malloc(sizeof(T) * count));
   }
@@ -189,6 +195,7 @@ protected:
   size_t capacity = 0;
   size_t size = 0;
 };
+
 
 } // namespace lstd
 

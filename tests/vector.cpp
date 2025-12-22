@@ -7,7 +7,9 @@ TEST_CASE("vector construction", "[vector]") {
   REQUIRE(v1.Size() == 0);
 
   auto v2 = lstd::Vector<Point>(42);
-  REQUIRE(v2.Capacity() == 42);
+  // Capacity doesn't need to be exactly 42,
+  // but at the least 42 elements should be ensured
+  REQUIRE(v2.Capacity() >= 42);
   REQUIRE(v2.Capacity() != v1.Capacity());
 
   // Test copy constructor
@@ -28,6 +30,49 @@ TEST_CASE("vector construction", "[vector]") {
   REQUIRE(counter == 3);
   REQUIRE(v3.Size() == 0);
   REQUIRE(v3Copy.Size() == 3);
+}
+
+TEST_CASE("vector assign", "[vector]")
+{
+  lstd::Vector<int> v1;
+  v1.PushBack(1);
+  v1.PushBack(2);
+  v1.PushBack(3);
+
+  lstd::Vector<int> v2;
+  v2.PushBack(4);
+  v2.PushBack(5);
+  v2 = v1;
+
+  REQUIRE(v2.Size() == v1.Size());
+  REQUIRE(v2.RawPtr() != v1.RawPtr()); // copy constructor should allocate new data
+
+  REQUIRE(v2[0] == v1[0]);
+  REQUIRE(v2[1] == v1[1]);
+  REQUIRE(v2[2] == v1[2]);
+
+  // Changing v2 should NOT change v1
+  v2[0] = 69;
+  REQUIRE(v2[0] != v1[0]);
+
+  // rvalue assign
+  v2 = lstd::Vector<int>(4, 42);
+  REQUIRE(v2.Size() == 4);
+  REQUIRE(v2[0] == 42);
+  REQUIRE(v2[1] == 42);
+  REQUIRE(v2[2] == 42);
+  REQUIRE(v2[3] == 42);
+
+  // Check that assign is releasing resources
+  int counter = 0;
+  {
+    lstd::Vector<Counter> v3(3, Counter(&counter));
+    REQUIRE(counter == 3);
+
+    // Should release all counters
+    v3 = lstd::Vector<Counter>();
+    REQUIRE(counter == 0);
+  }
 }
 
 TEST_CASE("vector push back", "[vector]")
@@ -85,10 +130,47 @@ TEST_CASE("vector push back", "[vector]")
   REQUIRE(counter == 0);
 }
 
+TEST_CASE("vector pop back", "[vector]")
+{
+  int counter = 0;
+  lstd::Vector<Counter> v1(3, Counter(&counter));
+  REQUIRE(counter == 3);
+
+  // Pop back should release resources for the last element
+  v1.PopBack();
+  REQUIRE(counter == 2);
+  REQUIRE(v1.Size() == 2);
+}
+
+lstd::Vector<size_t> toN(size_t n);
+TEST_CASE("vector pop", "[vector]")
+{
+  lstd::Vector<size_t> v1 = toN(8);
+  v1.Pop(7); // Pop last one
+  REQUIRE(v1.Size() == 7);
+
+  v1.Pop(2);
+  REQUIRE(v1.Size() == 6);
+  REQUIRE(v1[2] == 3);
+}
+
+
 TEST_CASE("vector index operator", "[vector]")
 {
   auto v = lstd::Vector<Point>();
   v.PushBack({1,2});
   REQUIRE(v[0].x == 1);
   REQUIRE(v[0].y == 2);
+
+  REQUIRE_THROWS_AS(v[1], lstd::AssertionError);
+}
+
+// -- < Utils > -----------------------------
+lstd::Vector<size_t> toN(size_t n)
+{
+  lstd::Vector<size_t> v(n, 0);
+  for (size_t i = 0; i < n; i++)
+    v[i] = i;
+
+  return v;
 }

@@ -26,6 +26,35 @@ struct Counter {
     other.counter = nullptr;
   }
 
+  Counter& operator=(const Counter& other)
+  {
+    if (&other == this)
+      return *this;
+
+    if (counter != nullptr)
+      (*counter)--;
+
+    counter = other.counter;
+    if (counter != nullptr)
+      (*counter)++;
+
+    return *this;
+  }
+
+  Counter& operator=(Counter&& other)
+  {
+    if (&other == this)
+      return *this;
+
+    if (counter != nullptr)
+      (*counter)--;
+
+    counter = other.counter;
+    other.counter = nullptr;
+
+    return *this;
+  }
+
   int Count() const { return counter == nullptr ? 0 : *counter; }
 };
 
