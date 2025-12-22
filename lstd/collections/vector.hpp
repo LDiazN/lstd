@@ -147,8 +147,10 @@ class Vector : public BaseVector<T> {
     data[index].~T(); // Destroy
 
     // Move memory to fill the gap
+    // Note that we can't use move assign (data[i] = move(data[i+1]) bc
+    // data[i] is uninitialized memory by now
     for (size_t i = index; i < size; i++)
-      data[i] = std::move(data[i + 1]);
+      new (data + i) T(std::move(data[i+1]));
   }
 
   const T& operator[](size_t index) const override
