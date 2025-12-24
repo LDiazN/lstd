@@ -73,6 +73,21 @@ TEST_CASE("vector assign", "[vector]")
     v3 = lstd::Vector<Counter>();
     REQUIRE(counter == 0);
   }
+
+  // Check that you properly handle self assign
+  counter = 0;
+  lstd::Vector<Counter> v4(1, Counter(&counter));
+  // ReSharper disable once CppIdenticalOperandsInBinaryExpression
+  v4 = v4;  // NOLINT(clang-diagnostic-self-assign-overloaded)
+
+  REQUIRE(counter == 1);
+  REQUIRE(v4.Size() == 1);
+  v4[0]; // should not fail
+
+  v4 = std::move(v4);  // NOLINT(clang-diagnostic-self-move)
+  REQUIRE(counter == 1);
+  REQUIRE(v4.Size() == 1);
+  v4[0];
 }
 
 TEST_CASE("vector push back", "[vector]")
@@ -140,6 +155,15 @@ TEST_CASE("vector pop back", "[vector]")
   v1.PopBack();
   REQUIRE(counter == 2);
   REQUIRE(v1.Size() == 2);
+
+  // You can pop until it's empty
+  v1.PopBack();
+  v1.PopBack();
+  REQUIRE(counter == 0);
+  REQUIRE(v1.Size() == 0);
+
+  // Poping again will throw an error on debug
+  REQUIRE_THROWS(v1.PopBack());
 }
 
 lstd::Vector<size_t> toN(size_t n);

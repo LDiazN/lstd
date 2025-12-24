@@ -143,12 +143,13 @@ class Vector : public BaseVector<T> {
   void Pop(size_t index) override
   {
     Assert(index < size, "Position to pop out of range");
+
+    // Move all elements one position earlier
+    for (size_t i = index; i < size - 1; i++)
+      data[i] = std::move(data[i+1]);
+
+    data[size - 1].~T();
     size--;
-
-    for (size_t i = index; i < size; i++)
-      new (data + i) T(std::move(data[i+1]));
-
-    data[size].~T();
   }
 
   const T& operator[](size_t index) const override
