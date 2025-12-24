@@ -176,6 +176,28 @@ TEST_CASE("vector pop", "[vector]")
   v1.Pop(2);
   REQUIRE(v1.Size() == 6);
   REQUIRE(v1[2] == 3);
+
+  // We can pop until it's empty
+  v1.Pop(0);
+  v1.Pop(0);
+  v1.Pop(0);
+  v1.Pop(0);
+  v1.Pop(0);
+  v1.Pop(0);
+
+  REQUIRE(v1.Size() == 0);
+
+  // Poping again raises an error on debug
+  REQUIRE_THROWS(v1.Pop(0));
+
+  // Check that popping is releasing resources properly
+  int counter = 0;
+  lstd::Vector<Counter> v2(4, Counter(&counter));
+  REQUIRE(counter == 4);
+  v2.Pop(1);
+  REQUIRE(counter == 3);
+  v2.Pop(2);
+  REQUIRE(counter == 2);
 }
 
 
