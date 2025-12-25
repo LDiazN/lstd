@@ -74,9 +74,7 @@ private:
     return p;
   }
 
-  void Destroy() const noexcept {
-    delete ptr;
-  }
+  void Destroy() const noexcept { delete ptr; }
 
 private:
   T *ptr = nullptr;
