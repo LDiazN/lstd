@@ -197,6 +197,11 @@ protected:
   size_t size = 0;
 };
 
+  template <typename T>
+  class OVector : public BaseVector<T>
+  {
+
+  };
 
 } // namespace lstd
 

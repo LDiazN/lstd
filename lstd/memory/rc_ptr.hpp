@@ -11,14 +11,14 @@ template <typename T> struct RcPtrEntry {
   RcPtrEntry(T *_ptr) : ptr(_ptr), count(1) {}
 
   /// Increases reference count, returns new count value
-  int Inc() {
+  size_t Inc() {
     count++;
     return count;
   }
 
   /// Decreases reference count, destroys internal object if counter reaches 0
   /// Returns new count value
-  int Dec() {
+  size_t Dec() {
     Assert(count > 0, "Reference count should be positive");
 
     count--;
@@ -32,9 +32,7 @@ template <typename T> struct RcPtrEntry {
 
   /// Destroys internal object
   void Destroy() {
-    if (ptr != nullptr)
-      delete ptr;
-
+    delete ptr;
     ptr = nullptr;
   }
 };
