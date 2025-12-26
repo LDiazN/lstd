@@ -2,7 +2,10 @@
 #include <catch2/catch_test_macros.hpp>
 #include <lstd/collections/vector.hpp>
 
-TEST_CASE("vector construction", "[vector]") {
+#include "lstd/memory/rc_ptr.hpp"
+
+TEST_CASE("vector construction", "[vector]")
+{
   auto v1 = lstd::Vector<Point>();
   REQUIRE(v1.Size() == 0);
 
@@ -361,6 +364,23 @@ TEST_CASE("optimistic vector reset", "[vector]") {
   }
   REQUIRE(counter1 == 0);
   REQUIRE(counter2 == 0);
+}
+
+TEST_CASE("optimistic vector with pointers", "[vector]")
+{
+  int counter = 0;
+  {
+    lstd::OVector<lstd::Ptr<Counter>, 4> v1(3, lstd::Ptr<Counter>(new Counter(&counter)));
+
+    // all three entries point to the same counter object
+    REQUIRE(counter == 1);
+
+    // You can deref pointers inside the vector
+    REQUIRE(v1[0]->Count() == 1);
+    REQUIRE(v1[1]->Count() == 1);
+    REQUIRE(v1[2]->Count() == 1);
+  }
+  REQUIRE(counter == 0);
 }
 
 // -- < Utils > -----------------------------
