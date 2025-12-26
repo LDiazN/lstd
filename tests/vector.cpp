@@ -285,9 +285,38 @@ TEST_CASE("optimistic vector push", "[vector]")
     v2.PushBack(Counter(&counter));
     v2.PushBack(Counter(&counter));
     v2.PushBack(Counter(&counter));
-    REQUIRE(counter == 3);
+    v2.PushBack(Counter(&counter));
+    REQUIRE(counter == 4);
   }
   REQUIRE(counter == 0);
+}
+
+TEST_CASE("optimistic vector pop", "[vector]")
+{
+  int counter = 0;
+  {
+    lstd::OVector<Counter, 4> v;
+    REQUIRE_THROWS(v.PopBack());
+    REQUIRE_THROWS(v.Pop(0));
+
+    v.PushBack(Counter(&counter));
+    REQUIRE(v.Size() == 1);
+    v.PopBack();
+    REQUIRE(v.Size() == 0);
+    v.PushBack(Counter(&counter));
+    v.PushBack(Counter(&counter));
+    v.Pop(0);
+    REQUIRE(v.Size() == 1);
+  }
+  REQUIRE(counter == 0);
+
+  lstd::OVector<int, 16> v1;
+  for (int i = 0; i < 8; i++)
+    v1.PushBack(i);
+
+  REQUIRE(v1[1] == 1);
+  v1.Pop(1);
+  REQUIRE(v1[1] == 2);
 }
 
 // -- < Utils > -----------------------------
