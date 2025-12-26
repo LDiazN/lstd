@@ -208,8 +208,7 @@ TEST_CASE("vector index operator", "[vector]") {
 }
 
 // -- < Optimistic Vector > -----------------
-TEST_CASE("optimistic vector construction", "[vector]")
-{
+TEST_CASE("optimistic vector construction", "[vector]") {
   lstd::OVector<int, 16> v; // Default construction
   REQUIRE(v.Size() == 0);
   REQUIRE(v.Capacity() == 16); // same as template param
@@ -224,21 +223,22 @@ TEST_CASE("optimistic vector construction", "[vector]")
     REQUIRE(counter == 16); // 4 + 12
 
     // Create a copy from other vector
-    lstd::OVector<Counter, 8> v3(v1);  // NOLINT(performance-unnecessary-copy-initialization)
+    lstd::OVector<Counter, 8> v3(
+        v1); // NOLINT(performance-unnecessary-copy-initialization)
     REQUIRE(counter == 20);
 
     // Move constructor
-    lstd::OVector<Counter, 8> v4(lstd::OVector<Counter, 8>(4, Counter(&counter)));
+    lstd::OVector<Counter, 8> v4(
+        lstd::OVector<Counter, 8>(4, Counter(&counter)));
   }
 
   REQUIRE(counter == 0);
 }
 
-TEST_CASE("optimistic vector assign", "[vector]")
-{
+TEST_CASE("optimistic vector assign", "[vector]") {
   int counter = 0;
   {
-    lstd::OVector<Counter, 8>v1(4, Counter(&counter));
+    lstd::OVector<Counter, 8> v1(4, Counter(&counter));
     REQUIRE(counter == 4);
 
     lstd::OVector<Counter, 8> v2(2, Counter(&counter));
@@ -262,16 +262,14 @@ TEST_CASE("optimistic vector assign", "[vector]")
   REQUIRE(counter == 0);
 }
 
-TEST_CASE("optimistic vector push", "[vector]")
-{
+TEST_CASE("optimistic vector push", "[vector]") {
   lstd::OVector<int, 4> v1;
   v1.PushBack(42);
   REQUIRE(v1.Size() == 1);
   REQUIRE(v1[0] == 42);
 
   // More pushes should trigger a resize to external mem
-  for (int i = 1; i < 5; i++)
-  {
+  for (int i = 1; i < 5; i++) {
     v1.PushBack(i);
     REQUIRE(v1.Size() == i + 1);
     REQUIRE(v1[i] == i);
@@ -291,8 +289,7 @@ TEST_CASE("optimistic vector push", "[vector]")
   REQUIRE(counter == 0);
 }
 
-TEST_CASE("optimistic vector pop", "[vector]")
-{
+TEST_CASE("optimistic vector pop", "[vector]") {
   int counter = 0;
   {
     lstd::OVector<Counter, 4> v;
@@ -319,8 +316,7 @@ TEST_CASE("optimistic vector pop", "[vector]")
   REQUIRE(v1[1] == 2);
 }
 
-TEST_CASE("optimistic vector indexing", "[vector]")
-{
+TEST_CASE("optimistic vector indexing", "[vector]") {
   lstd::OVector<int, 16> v1;
   // Index out of range
   REQUIRE_THROWS(v1[0]);
@@ -346,14 +342,13 @@ TEST_CASE("optimistic vector indexing", "[vector]")
   {
     const lstd::OVector<Counter, 4> v2(2, Counter(&counter));
     REQUIRE(counter == 2);
-    const Counter& c = v2[0];
+    const Counter &c = v2[0];
     REQUIRE(c.counter == &counter);
   }
   REQUIRE(counter == 0);
 }
 
-TEST_CASE("optimistic vector reset", "[vector]")
-{
+TEST_CASE("optimistic vector reset", "[vector]") {
   int counter1 = 0;
   int counter2 = 0;
   {
