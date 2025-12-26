@@ -154,9 +154,8 @@ private:
 
   /// Changes the capacity of this vector
   void Resize() {
-    size_t newCapacity = GetNewCapacity();
-    data = static_cast<T *>(realloc(data, sizeof(T) * newCapacity));
-    capacity = newCapacity;
+    capacity = GetNewCapacity();
+    data = static_cast<T *>(realloc(data, sizeof(T) * capacity));
   }
 
   static T *Allocate(size_t count) {
@@ -169,7 +168,203 @@ protected:
   size_t size = 0;
 };
 
-template <typename T> class OVector : public BaseVector<T> {};
+/// Optimistic vector: Assumes the vector won't need to resize most of the time,
+/// so store data initially inside the vector itself.
+///
+/// If more space is needed, allocate more memory and behave like the normal vector
+template <typename T, size_t S> class OVector : public BaseVector<T>
+{
+public:
+  OVector() : data(memory)
+  {
+    // Is this really necessary?
+    memset(memory, 0, sizeof(memory));
+  }
+
+  OVector(size_t copies, const T& defaultValue) : data(memory)
+  {
+
+    if (copies > capacity)
+      Resize();
+    else
+      memset(memory, 0, sizeof(memory));
+
+    for (size_t i = 0; i < copies; i++)
+      new (data + i) T(defaultValue); // copy constructor
+
+    size = copies;
+  }
+
+  OVector(const OVector<T,S>& other) : size(other.size), capacity(other.capacity)
+  {
+    if (other.capacity > S)
+      data = static_cast<T*>(malloc(sizeof(T) * other.capacity));
+    else
+      data = memory;
+
+    for (size_t i = 0; i < size; i++)
+      new (data + i) T(other[i]);
+  }
+
+  OVector(OVector<T,S>&& other) noexcept : size(other.size), capacity(other.capacity)
+  {
+    if (other.memory != other.data)
+      data = other.data;
+    else
+      memcpy(memory, other.memory, sizeof(memory));
+
+    other.Clear();
+  }
+
+  ~OVector() override
+  {
+    for (size_t i = 0; i < size; i++)
+      data[i].~T();
+
+    // Release memory if we have heap memory
+    if (data != memory)
+      free(data);
+
+    Clear();
+  }
+
+  OVector<T,S>& operator=(const OVector<T, S>& other)
+  {
+    if (&other == this)
+      return *this;
+
+    // Use copy-and-swap
+    OVector<T,S> temp(other);
+    ~OVector();
+
+    // Defer to move assign
+    return *this = std::move(temp);
+  }
+
+  OVector<T,S>& operator=(OVector<T,S>&& other) noexcept
+  {
+    if (&other == this)
+      return *this;
+
+    ~OVector();
+    size = other.size;
+    capacity = other.capacity;
+    if (other.data != other.memory)
+      data = other.data;
+    else
+      memcpy(memory, other.memory, sizeof(other.memory));
+
+    other.Clear();
+    return *this;
+  }
+
+  T& operator[](size_t index) override
+  {
+    Assert(index < size, "Index out of range");
+    return data[index];
+  }
+
+  const T& operator[](size_t index) const override
+  {
+    Assert(index < size, "Index out of range");
+    return data[index];
+  }
+
+  size_t Size() const override
+  {
+    return size;
+  }
+
+  size_t Capacity() const override
+  {
+    return capacity;
+  }
+
+  T* RawPtr() override
+  {
+    return data;
+  }
+
+  const T* RawPtr() const override
+  {
+    return data;
+  }
+
+  void Reset() override
+  {
+    if (data != memory)
+      free(data);
+    Clear();
+  }
+
+  void PushBack(T item) override
+  {
+    if (size == capacity)
+      Resize();
+
+    data[size] = std::move(item);
+    size++;
+  }
+
+  void PopBack() override
+  {
+    Assert(size > 0, "Trying to pop from empty vector");
+    size--;
+    data[size].~T();
+  }
+
+  void Pop(size_t index) override
+  {
+    Assert(index < size, "Index out of range");
+    for (size_t i = index; i < size - 1; i++)
+      data[i] = std::move(data[i+1]);
+    data[size - 1].~T();
+    size--;
+  }
+
+private:
+
+  /// Resizes the vector, increasing capacity.
+  ///
+  /// If the vector is resizing for the first time, move it to the heap
+  void Resize()
+  {
+    capacity = GetNewCapacity();
+    if (data == memory) // Still inside memory, we have to move it to a new memory segment
+    {
+      data = static_cast<T*>(malloc(sizeof(T) * capacity));
+
+      // Move content out of memory block to the data block
+      for (size_t i = 0; i < size; i++)
+        new (data + i) T(std::move(memory[i]));
+
+      return;
+    }
+
+    // Regular resize
+    data = static_cast<T*>(realloc(data, sizeof(T) * capacity));
+  }
+
+  size_t GetNewCapacity() const
+  {
+    return closest2Pow(capacity+1);
+  }
+
+  void Clear()
+  {
+    capacity = S;
+    size = 0;
+    data = memory;
+    memset(memory, 0, sizeof(memory));
+  }
+
+private:
+  T* data = nullptr;
+  size_t size = 0;
+  size_t capacity = S;
+  // Create `memory` as a byte array to force uninitialized memory
+  alignas(T) char memory[sizeof(T) * S];
+};
 
 } // namespace lstd
 

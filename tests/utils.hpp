@@ -15,19 +15,14 @@ struct Counter {
     counter = nullptr;
   }
 
-  Counter(const Counter& other) : counter(other.counter)
-  {
+  Counter(const Counter &other) : counter(other.counter) {
     if (counter != nullptr)
       (*counter)++;
   }
 
-  Counter(Counter&& other) : counter(other.counter)
-  {
-    other.counter = nullptr;
-  }
+  Counter(Counter &&other) : counter(other.counter) { other.counter = nullptr; }
 
-  Counter& operator=(const Counter& other)
-  {
+  Counter &operator=(const Counter &other) {
     if (&other == this)
       return *this;
 
@@ -41,8 +36,7 @@ struct Counter {
     return *this;
   }
 
-  Counter& operator=(Counter&& other)
-  {
+  Counter &operator=(Counter &&other) {
     if (&other == this)
       return *this;
 

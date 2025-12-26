@@ -1,6 +1,6 @@
+#include "utils.hpp"
 #include <catch2/catch_test_macros.hpp>
 #include <lstd/collections/vector.hpp>
-#include "utils.hpp"
 
 TEST_CASE("vector construction", "[vector]") {
   auto v1 = lstd::Vector<Point>();
@@ -32,8 +32,7 @@ TEST_CASE("vector construction", "[vector]") {
   REQUIRE(v3Copy.Size() == 3);
 }
 
-TEST_CASE("vector assign", "[vector]")
-{
+TEST_CASE("vector assign", "[vector]") {
   lstd::Vector<int> v1;
   v1.PushBack(1);
   v1.PushBack(2);
@@ -45,7 +44,8 @@ TEST_CASE("vector assign", "[vector]")
   v2 = v1;
 
   REQUIRE(v2.Size() == v1.Size());
-  REQUIRE(v2.RawPtr() != v1.RawPtr()); // copy constructor should allocate new data
+  REQUIRE(v2.RawPtr() !=
+          v1.RawPtr()); // copy constructor should allocate new data
 
   REQUIRE(v2[0] == v1[0]);
   REQUIRE(v2[1] == v1[1]);
@@ -78,24 +78,23 @@ TEST_CASE("vector assign", "[vector]")
   counter = 0;
   lstd::Vector<Counter> v4(1, Counter(&counter));
   // ReSharper disable once CppIdenticalOperandsInBinaryExpression
-  v4 = v4;  // NOLINT(clang-diagnostic-self-assign-overloaded)
+  v4 = v4; // NOLINT(clang-diagnostic-self-assign-overloaded)
 
   REQUIRE(counter == 1);
   REQUIRE(v4.Size() == 1);
   v4[0]; // should not fail
 
-  v4 = std::move(v4);  // NOLINT(clang-diagnostic-self-move)
+  v4 = std::move(v4); // NOLINT(clang-diagnostic-self-move)
   REQUIRE(counter == 1);
   REQUIRE(v4.Size() == 1);
   v4[0];
 }
 
-TEST_CASE("vector push back", "[vector]")
-{
+TEST_CASE("vector push back", "[vector]") {
   auto v = lstd::Vector<Point>();
   REQUIRE(v.Size() == 0);
 
-  v.PushBack({1,2});
+  v.PushBack({1, 2});
   REQUIRE(v.Size() == 1);
   REQUIRE(v[0].x == 1);
   REQUIRE(v[0].y == 2);
@@ -104,11 +103,11 @@ TEST_CASE("vector push back", "[vector]")
   auto v1 = lstd::Vector<Point>(1);
   REQUIRE(v1.Capacity() == 1);
 
-  v1.PushBack({4,2});
+  v1.PushBack({4, 2});
   REQUIRE(v1.Size() == 1);
   REQUIRE(v1.Capacity() == 1); // don't resize if you have enough space
 
-  v1.PushBack({6,9});
+  v1.PushBack({6, 9});
   REQUIRE(v1.Capacity() > 1); // Resize should be triggered by now
 
   // Test correct resource release
@@ -122,7 +121,8 @@ TEST_CASE("vector push back", "[vector]")
   }
   REQUIRE(counter == 0);
 
-  // Test that resize is not creating new resources and forgetting to release the previous ones
+  // Test that resize is not creating new resources and forgetting to release
+  // the previous ones
   counter = 0;
   {
     auto v3 = lstd::Vector<Counter>(1);
@@ -145,8 +145,7 @@ TEST_CASE("vector push back", "[vector]")
   REQUIRE(counter == 0);
 }
 
-TEST_CASE("vector pop back", "[vector]")
-{
+TEST_CASE("vector pop back", "[vector]") {
   int counter = 0;
   lstd::Vector<Counter> v1(3, Counter(&counter));
   REQUIRE(counter == 3);
@@ -167,8 +166,7 @@ TEST_CASE("vector pop back", "[vector]")
 }
 
 lstd::Vector<size_t> toN(size_t n);
-TEST_CASE("vector pop", "[vector]")
-{
+TEST_CASE("vector pop", "[vector]") {
   lstd::Vector<size_t> v1 = toN(8);
   v1.Pop(7); // Pop last one
   REQUIRE(v1.Size() == 7);
@@ -200,11 +198,9 @@ TEST_CASE("vector pop", "[vector]")
   REQUIRE(counter == 2);
 }
 
-
-TEST_CASE("vector index operator", "[vector]")
-{
+TEST_CASE("vector index operator", "[vector]") {
   auto v = lstd::Vector<Point>();
-  v.PushBack({1,2});
+  v.PushBack({1, 2});
   REQUIRE(v[0].x == 1);
   REQUIRE(v[0].y == 2);
 
@@ -212,8 +208,7 @@ TEST_CASE("vector index operator", "[vector]")
 }
 
 // -- < Utils > -----------------------------
-lstd::Vector<size_t> toN(size_t n)
-{
+lstd::Vector<size_t> toN(size_t n) {
   lstd::Vector<size_t> v(n, 0);
   for (size_t i = 0; i < n; i++)
     v[i] = i;
