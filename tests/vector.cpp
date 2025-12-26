@@ -259,7 +259,34 @@ TEST_CASE("optimistic vector assign", "[vector]")
     v2 = v3;
     REQUIRE(counter == 28);
   }
+  REQUIRE(counter == 0);
+}
 
+TEST_CASE("optimistic vector push", "[vector]")
+{
+  lstd::OVector<int, 4> v1;
+  v1.PushBack(42);
+  REQUIRE(v1.Size() == 1);
+  REQUIRE(v1[0] == 42);
+
+  // More pushes should trigger a resize to external mem
+  for (int i = 1; i < 5; i++)
+  {
+    v1.PushBack(i);
+    REQUIRE(v1.Size() == i + 1);
+    REQUIRE(v1[i] == i);
+  }
+  REQUIRE(v1.Capacity() > 4);
+
+  // Triggering a resize should not leave dangling pointers
+  int counter = 0;
+  {
+    lstd::OVector<Counter, 2> v2;
+    v2.PushBack(Counter(&counter));
+    v2.PushBack(Counter(&counter));
+    v2.PushBack(Counter(&counter));
+    REQUIRE(counter == 3);
+  }
   REQUIRE(counter == 0);
 }
 

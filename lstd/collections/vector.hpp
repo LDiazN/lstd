@@ -298,7 +298,7 @@ public:
     if (size == capacity)
       Resize();
 
-    data[size] = std::move(item);
+    new (data + size) T(item);
     size++;
   }
 
