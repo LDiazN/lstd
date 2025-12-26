@@ -175,13 +175,13 @@ protected:
 template <typename T, size_t S> class OVector : public BaseVector<T>
 {
 public:
-  OVector() : data(memory)
+  OVector() : data(reinterpret_cast<T*>(memory))
   {
     // Is this really necessary?
     memset(memory, 0, sizeof(memory));
   }
 
-  OVector(size_t copies, const T& defaultValue) : data(memory)
+  OVector(size_t copies, const T& defaultValue) : data(reinterpret_cast<T*>(memory))
   {
 
     if (copies > capacity)
@@ -200,7 +200,7 @@ public:
     if (other.capacity > S)
       data = static_cast<T*>(malloc(sizeof(T) * other.capacity));
     else
-      data = memory;
+      data = reinterpret_cast<T*>(memory);
 
     for (size_t i = 0; i < size; i++)
       new (data + i) T(other[i]);
@@ -222,7 +222,7 @@ public:
       data[i].~T();
 
     // Release memory if we have heap memory
-    if (data != memory)
+    if (UsingExternalMem())
       free(data);
 
     Clear();
@@ -233,12 +233,8 @@ public:
     if (&other == this)
       return *this;
 
-    // Use copy-and-swap
-    OVector<T,S> temp(other);
-    ~OVector();
-
-    // Defer to move assign
-    return *this = std::move(temp);
+    // Defer to move assign, use copy-and-swap
+    return *this = OVector<T,S>(other);
   }
 
   OVector<T,S>& operator=(OVector<T,S>&& other) noexcept
@@ -246,10 +242,10 @@ public:
     if (&other == this)
       return *this;
 
-    ~OVector();
+    this->~OVector();
     size = other.size;
     capacity = other.capacity;
-    if (other.data != other.memory)
+    if (other.UsingExternalMem())
       data = other.data;
     else
       memcpy(memory, other.memory, sizeof(other.memory));
@@ -292,7 +288,7 @@ public:
 
   void Reset() override
   {
-    if (data != memory)
+    if (UsingExternalMem())
       free(data);
     Clear();
   }
@@ -318,8 +314,8 @@ public:
     Assert(index < size, "Index out of range");
     for (size_t i = index; i < size - 1; i++)
       data[i] = std::move(data[i+1]);
-    data[size - 1].~T();
     size--;
+    data[size].~T();
   }
 
 private:
@@ -330,14 +326,15 @@ private:
   void Resize()
   {
     capacity = GetNewCapacity();
-    if (data == memory) // Still inside memory, we have to move it to a new memory segment
+    if (!UsingExternalMem()) // Still inside memory, we have to move it to a new memory segment
     {
-      data = static_cast<T*>(malloc(sizeof(T) * capacity));
+      T* newData = static_cast<T*>(malloc(sizeof(T) * capacity));
 
       // Move content out of memory block to the data block
       for (size_t i = 0; i < size; i++)
-        new (data + i) T(std::move(memory[i]));
+        new (newData + i) T(std::move(data[i])); // Data points to memory
 
+      data = newData;
       return;
     }
 
@@ -354,8 +351,13 @@ private:
   {
     capacity = S;
     size = 0;
-    data = memory;
+    data = reinterpret_cast<T*>(memory);
     memset(memory, 0, sizeof(memory));
+  }
+
+  bool UsingExternalMem() const
+  {
+    return reinterpret_cast<const void*>(data) != reinterpret_cast<const void*>(&memory);
   }
 
 private:

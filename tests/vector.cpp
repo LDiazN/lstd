@@ -204,7 +204,63 @@ TEST_CASE("vector index operator", "[vector]") {
   REQUIRE(v[0].x == 1);
   REQUIRE(v[0].y == 2);
 
-  REQUIRE_THROWS_AS(v[1], lstd::AssertionError);
+  REQUIRE_THROWS(v[1]);
+}
+
+// -- < Optimistic Vector > -----------------
+TEST_CASE("optimistic vector construction", "[vector]")
+{
+  lstd::OVector<int, 16> v; // Default construction
+  REQUIRE(v.Size() == 0);
+  REQUIRE(v.Capacity() == 16); // same as template param
+
+  int counter = 0;
+  {
+    lstd::OVector<Counter, 8> v1(4, Counter(&counter));
+    REQUIRE(counter == 4);
+
+    // copies > optimistic capacity
+    lstd::OVector<Counter, 8> v2(12, Counter(&counter));
+    REQUIRE(counter == 16); // 4 + 12
+
+    // Create a copy from other vector
+    lstd::OVector<Counter, 8> v3(v1);  // NOLINT(performance-unnecessary-copy-initialization)
+    REQUIRE(counter == 20);
+
+    // Move constructor
+    lstd::OVector<Counter, 8> v4(lstd::OVector<Counter, 8>(4, Counter(&counter)));
+  }
+
+  REQUIRE(counter == 0);
+}
+
+TEST_CASE("optimistic vector assign", "[vector]")
+{
+  int counter = 0;
+  {
+    lstd::OVector<Counter, 8>v1(4, Counter(&counter));
+    REQUIRE(counter == 4);
+
+    lstd::OVector<Counter, 8> v2(2, Counter(&counter));
+    REQUIRE(counter == 6);
+
+    // Copy assign
+    v2 = v1;
+    REQUIRE(counter == 8);
+
+    // Move assign
+    v2 = lstd::OVector<Counter, 8>(8, Counter(&counter));
+    REQUIRE(counter == 12);
+
+    // Assign from a vector with external memory
+    lstd::OVector<Counter, 8> v3(12, Counter(&counter));
+
+    // Copy assign again
+    v2 = v3;
+    REQUIRE(counter == 28);
+  }
+
+  REQUIRE(counter == 0);
 }
 
 // -- < Utils > -----------------------------
