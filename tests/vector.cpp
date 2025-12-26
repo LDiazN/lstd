@@ -319,6 +319,55 @@ TEST_CASE("optimistic vector pop", "[vector]")
   REQUIRE(v1[1] == 2);
 }
 
+TEST_CASE("optimistic vector indexing", "[vector]")
+{
+  lstd::OVector<int, 16> v1;
+  // Index out of range
+  REQUIRE_THROWS(v1[0]);
+  v1.PushBack(1);
+  v1.PushBack(2);
+  v1.PushBack(3);
+
+  REQUIRE(v1[0] == 1);
+  REQUIRE(v1[1] == 2);
+  REQUIRE(v1[2] == 3);
+
+  // You can replace an element inside the array
+  int counter = 0;
+  {
+    lstd::OVector<Counter, 4> v2(2, Counter(&counter));
+    REQUIRE(counter == 2);
+    v2[1] = Counter(nullptr);
+    REQUIRE(counter == 1);
+  }
+  REQUIRE(counter == 0);
+
+  // You can get a const reference
+  {
+    const lstd::OVector<Counter, 4> v2(2, Counter(&counter));
+    REQUIRE(counter == 2);
+    const Counter& c = v2[0];
+    REQUIRE(c.counter == &counter);
+  }
+  REQUIRE(counter == 0);
+}
+
+TEST_CASE("optimistic vector reset", "[vector]")
+{
+  int counter1 = 0;
+  int counter2 = 0;
+  {
+    lstd::OVector<Counter, 4> v1(3, Counter(&counter1));
+    REQUIRE(counter1 == 3);
+    v1.Reset();
+    REQUIRE(counter1 == 0);
+    v1.PushBack(Counter(&counter2));
+    REQUIRE(counter2 == 1);
+  }
+  REQUIRE(counter1 == 0);
+  REQUIRE(counter2 == 0);
+}
+
 // -- < Utils > -----------------------------
 lstd::Vector<size_t> toN(size_t n) {
   lstd::Vector<size_t> v(n, 0);

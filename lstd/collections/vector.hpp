@@ -218,14 +218,7 @@ public:
 
   ~OVector() override
   {
-    for (size_t i = 0; i < size; i++)
-      data[i].~T();
-
-    // Release memory if we have heap memory
-    if (UsingExternalMem())
-      free(data);
-
-    Clear();
+    OVector::Reset();
   }
 
   OVector<T,S>& operator=(const OVector<T, S>& other)
@@ -242,7 +235,7 @@ public:
     if (&other == this)
       return *this;
 
-    this->~OVector();
+    OVector::Reset();
     size = other.size;
     capacity = other.capacity;
     if (other.UsingExternalMem())
@@ -288,8 +281,12 @@ public:
 
   void Reset() override
   {
+    for (int i = 0; i < size; i++)
+      (*this)[i].~T();
+
     if (UsingExternalMem())
       free(data);
+
     Clear();
   }
 
