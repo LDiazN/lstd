@@ -1,8 +1,6 @@
 #ifndef VECTOR_HPP
 #define VECTOR_HPP
-#include <cstdlib>
 #include <lstd/debug/assert.hpp>
-#include <sstream>
 
 namespace lstd {
 
