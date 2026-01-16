@@ -28,4 +28,10 @@ TODO
 
 ## Tools: autobro
 
-TODO
+Autobro (or just `bro`) it's a command line tool I made to experiment using [`Nim`](https://nim-lang.org/) as scripting language. It implements several useful common operations for development. Compiling it requires having [`Nimble`](https://github.com/nim-lang/nimble) installed. 
+
+### Installation
+To build `bro`:
+1. `cd` into the `autobro` directory
+2. run: `nimble build -d:release`
+3. The executable file will be placed in the `autobro` directory, you can copy it into the main directory with `cp autobro/bro.exe .`
