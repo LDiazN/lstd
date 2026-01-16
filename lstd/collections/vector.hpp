@@ -208,7 +208,8 @@ public:
     if (other.memory != other.data)
       data = other.data;
     else
-      memcpy(memory, other.memory, sizeof(memory));
+      for (size_t i = 0; i < other.Size(); i++)
+        data[i] = std::move(other.dat[i]);
 
     other.Clear();
   }
@@ -233,7 +234,10 @@ public:
     if (other.UsingExternalMem())
       data = other.data;
     else
-      memcpy(memory, other.memory, sizeof(other.memory));
+    {
+      for (size_t i = 0; i < other.Size(); i++)
+        data[i] = std::move(other.data[i]);
+    }
 
     other.Clear();
     return *this;
