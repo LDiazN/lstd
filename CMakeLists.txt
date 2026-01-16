@@ -49,3 +49,21 @@ include(CTest)
 include(Catch)
 catch_discover_tests(tests)
 endif()
+
+# -- < Sandbox > --------------------------------
+option(SANDBOX "If should build sandbox exec" OFF)
+
+if (SANDBOX)
+add_executable(sandbox)
+
+target_sources(sandbox
+    PRIVATE
+    sandbox/main.cpp
+)
+
+target_link_libraries(sandbox
+    PRIVATE
+    lstd
+)
+
+endif()

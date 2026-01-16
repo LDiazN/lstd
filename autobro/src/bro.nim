@@ -35,6 +35,12 @@ proc test(g: bool = false, c: bool = false): int =
     "ctest --test-dir build --output-on-failure"
   ])
 
+proc sandbox(): int =
+  return runcs(@[
+    "cmake -DSANDBOX=ON -B build",
+    "cmake --build build",
+  ])
+
 proc format(): int =
   var files: seq[string] = @[]
 
@@ -61,4 +67,4 @@ proc clean():int =
 
 when isMainModule:
   import cligen
-  dispatchMulti([sup], [update], [build], [test], [clean], [format])
+  dispatchMulti([sup], [update], [build], [test], [clean], [format], [sandbox])

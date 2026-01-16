@@ -1,5 +1,5 @@
-#ifndef __ASSERT_HPP__
-#define __ASSERT_HPP__
+#ifndef ASSERT_HPP_
+#define ASSERT_HPP_
 
 #include <string>
 
