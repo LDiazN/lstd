@@ -60,19 +60,9 @@ public:
     data = nullptr;
   }
 
-  Vector &operator=(const Vector &other) {
-    if (&other == this)
-      return *this;
-
-    // Defer to the move assign
-    *this = Vector(other);
-
-    return *this;
-  }
-
-  Vector &operator=(Vector &&other) noexcept {
-    if (&other == this)
-      return *this;
+  Vector &operator=(Vector other) noexcept {
+    // Use value assign since copy assign still needs a temp copy
+    // and move assign won't trigger an additional copy
 
     // Destroy current vector
     Vector::Reset();
@@ -217,6 +207,8 @@ public:
   ~OVector() override { OVector::Reset(); }
 
   OVector<T, S> &operator=(OVector<T, S> other) noexcept {
+    // Use value assign since copy assign still needs a temp copy
+    // and move assign won't trigger an additional copy
     OVector::Reset();
     size = other.size;
     capacity = other.capacity;
