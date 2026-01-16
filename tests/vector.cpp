@@ -4,8 +4,7 @@
 
 #include "lstd/memory/rc_ptr.hpp"
 
-TEST_CASE("vector construction", "[vector]")
-{
+TEST_CASE("vector construction", "[vector]") {
   auto v1 = lstd::Vector<Point>();
   REQUIRE(v1.Size() == 0);
 
@@ -366,11 +365,11 @@ TEST_CASE("optimistic vector reset", "[vector]") {
   REQUIRE(counter2 == 0);
 }
 
-TEST_CASE("optimistic vector with pointers", "[vector]")
-{
+TEST_CASE("optimistic vector with pointers", "[vector]") {
   int counter = 0;
   {
-    lstd::OVector<lstd::Ptr<Counter>, 4> v1(3, lstd::Ptr<Counter>(new Counter(&counter)));
+    lstd::OVector<lstd::Ptr<Counter>, 4> v1(
+        3, lstd::Ptr<Counter>(new Counter(&counter)));
 
     // all three entries point to the same counter object
     REQUIRE(counter == 1);

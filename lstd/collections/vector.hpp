@@ -216,25 +216,14 @@ public:
 
   ~OVector() override { OVector::Reset(); }
 
-  OVector<T, S> &operator=(const OVector<T, S> &other) {
-    if (&other == this)
-      return *this;
-
-    // Defer to move assign, use copy-and-swap
-    return *this = OVector<T, S>(other);
-  }
-
-  OVector<T, S> &operator=(OVector<T, S> &&other) noexcept {
-    if (&other == this)
-      return *this;
-
+  OVector<T, S> &operator=(OVector<T, S> other) noexcept {
     OVector::Reset();
     size = other.size;
     capacity = other.capacity;
+
     if (other.UsingExternalMem())
       data = other.data;
-    else
-    {
+    else {
       for (size_t i = 0; i < other.Size(); i++)
         data[i] = std::move(other.data[i]);
     }
